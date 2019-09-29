@@ -10,15 +10,12 @@ import drone.Otimizacao as otim
 import drone.Sensor as Sensor
 import drone.Site as Site
 import drone.DroneMQTT as ServiceSchedule
-from multiprocessing.pool import ThreadPool
-pool = ThreadPool(processes=1)
 from threading import Thread
 
 app = Flask(__name__)
 
 
 autonomia = 2500
-
 idSite = 1
 
 sites = []
@@ -66,14 +63,10 @@ dadosColetados = []
 
 @app.route("/")
 def index():
-
     retorno = 'Id  !!  Lista De Sensores  !!   Quantidade !! Foi Solicitado? <br>'
-    
     for s in listaSensores:
         retorno += str(s.getId())+ "&nbsp;!!&nbsp;" + s.getNome()+ "&nbsp;!!&nbsp;" + str(s.getQuantidade()) + "&nbsp;!!&nbsp;" + str(s.getSolicitado())+  "<br> "
-        
     return retorno
-
 
 @app.route("/autonomia")
 def autonomiaDefinition():
@@ -81,29 +74,22 @@ def autonomiaDefinition():
     global autonomia;
     autonomiaAntiga = autonomia
     autonomia = float(autonomiaUsu)
-
     return( 'Nova autonomia:' + str(autonomiaUsu) + '<br>'
             'Autonomia antiga:' + str(autonomiaAntiga) )
-
 
 @app.route("/cadastraApp")
 def cadastraApp():
     nomeApp = request.args.get('nomeApp')
-    
     isCadastrado = False
-    
     for x in listaAppsCadastradas:
         if nomeApp == x:
-            isCadastrado = True
-            
+            isCadastrado = True           
     
     if isCadastrado == False:
         listaAppsCadastradas.append(nomeApp)
         return( 'App cadastrado com sucesso')
     else:
         return( 'App já está cadastrado')
-
-
 
 @app.route("/planejaVoo")
 def planejaVoo():
@@ -123,10 +109,10 @@ def planejaVoo():
     
     if percentual > 80:
 
-        retorno = 'O uso da autonomia para visitar todos os sensores está em  ' + str(percentual) + ' <br>' + 'O Vôo realizado alcançou: <br>'  + otim.getMaximoDeSensores(listaSites, autonomia)
+        retorno = 'O uso da autonomia para visitar todos os sensores está em  ' + str(percentual) + '% <br>' + 'Estatísticas para realização do voo: <br>'  + otim.getMaximoDeSensores(listaSites, autonomia)
      
-        thread = Thread(target=runDroneMQTT, args=("MQTT", "CLIENT"))
-        thread.start()
+       # thread = Thread(target=runDroneMQTT, args=("MQTT", "CLIENT"))
+        #thread.start()
         
         return (retorno)
 
@@ -155,36 +141,34 @@ def solicitaDadosSensor():
                 x.setSolicitado(True)
                 listaSensores.append(x)
     
-    return (planejaVoo())
-
-                
-            
+    return (planejaVoo())          
 
 def runDroneMQTT(arg, arg2):
     print ("Running thread! Args:", (arg, arg2))
     print ("Done!")    
     ServiceSchedule.loop()
 
-        
-
-
-@app.route("/dados")
-def dados():
+@app.route("/setDados")
+def setDados():
     dados = request.args.get('data')
     print('msg no webservice:' + dados)
     
+    dados = dados.replace('b','')
+
     dadosColetados.append(dados);
     
     return 'ok'
     
     
     
-@app.route("/obtemDados")
-def obtemDados():
+@app.route("/getDados")
+def getDados():
     retorno = ''
+    id = 1
     
     for s in dadosColetados:
-        retorno +=  str (s)+  "<br> "
+        retorno += str(id)+': ' + str (s)+  "<br> "
+        id += 1
         
     return retorno
 

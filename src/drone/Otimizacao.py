@@ -96,9 +96,6 @@ def getMinimoEnergia(listaSites):
         for t in tours:
                 print(' -> '.join([ a for a,b in t]+['org']))
 
-
-        
-        print(value(prob.objective))
         
         return(value(prob.objective))
 
@@ -191,11 +188,7 @@ def getMaximoDeSensores(listaSites, autonomia):
         for i in sites:
             for j in sites:
                 if i != j :
-                    print(value(x[(i,j)])) 
-                    #print(distances[i][j])                     
                     distanciaTotal += value(x[(i,j)])  * distances[(i,j)]
-            
-        print(distanciaTotal)
         
         totalSensores = -1
         for i in sites:
@@ -203,18 +196,14 @@ def getMaximoDeSensores(listaSites, autonomia):
                 if i != j:
                     totalSensores += value(x[(i,j)])
             
-        print(totalSensores)
-        
-        
-        
-        #------------
+
         maxSensores = value(prob.objective)
         
         global minimoEnergia;
         
         minimoEnergia = getMinimoEnergiaComMaxSensores(maxSensores, distances, sites)
             
-        return('o maximo de sensores é: ' + str(maxSensores-1) +' A quantidade de energia total inicial foi: '+ str(distanciaTotal)+' O mínimo de custo foi: '+str(minimoEnergia))
+        return('O maximo de sensores é: ' + str(maxSensores-1) +' <br> O custo inicial para realização do voo seria: '+ str(distanciaTotal)+' <br> O mínimo de custo alcançado é: '+str(minimoEnergia))
     
     
 def getMinimoEnergiaComMaxSensores(maxSensores, distances, sites):
@@ -229,7 +218,6 @@ def getMinimoEnergiaComMaxSensores(maxSensores, distances, sites):
 
 
         #the objective
-        
         cost =  ( lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ])) 
         prob+=cost
 

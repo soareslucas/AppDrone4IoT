@@ -44,7 +44,7 @@ def send_message(msg):
     try:
         client.connect(MQTT_ADDRESS, MQTT_PORT, MQTT_TIMEOUT)
     except:
-        print("Conex„o Falhou!")
+        print("Conex√£o Falhou!")
 
     result, mid = client.publish('/drone/sensores', msg)
     print('Mensagem enviada ao canal: %d' % mid)

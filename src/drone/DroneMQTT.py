@@ -13,7 +13,6 @@ import requests
 
 from collections import namedtuple
 
-Auth = namedtuple('Auth', ['user', 'pwd'])
 
 MQTT_ADDRESS = '127.0.0.1'
 MQTT_PORT = 1883
@@ -45,7 +44,10 @@ def on_message(client, userdata, msg):
 
     if msg.topic == '/drone/sensores':
         dados = ('%s' % msg.payload)
-        r = requests.get("http://127.0.0.1:5000/dados?data="+dados) 
+        print(dados)
+        r = requests.get("http://127.0.0.1:5000/setDados?data="+dados) 
+        
+        print(r.status_code)
         client.loop_stop()  
         
     else:
