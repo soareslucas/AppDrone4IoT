@@ -1,1 +1,1 @@
-FLASK_APP=src/WebsService.py flask run
+web: python src/WebService.py
