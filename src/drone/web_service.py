@@ -62,7 +62,7 @@ dadosColetados = []
 
 
 @app.route("/")
-def index():
+def web_service():
     retorno = 'Id  !!  Lista De Sensores  !!   Quantidade !! Foi Solicitado? <br>'
     for s in listaSensores:
         retorno += str(s.getId())+ "&nbsp;!!&nbsp;" + s.getNome()+ "&nbsp;!!&nbsp;" + str(s.getQuantidade()) + "&nbsp;!!&nbsp;" + str(s.getSolicitado())+  "<br> "
