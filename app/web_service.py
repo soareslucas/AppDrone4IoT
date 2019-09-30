@@ -15,6 +15,10 @@ import os
 
 app = Flask(__name__)
 
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+
 autonomia = 2500
 idSite = 1
 
@@ -68,11 +72,7 @@ def web_service():
         retorno += str(s.getId())+ "&nbsp;!!&nbsp;" + s.getNome()+ "&nbsp;!!&nbsp;" + str(s.getQuantidade()) + "&nbsp;!!&nbsp;" + str(s.getSolicitado())+  "<br> "
     return retorno
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
-
-@app.route("/autonomia")
+@app.route("/autonomia", methods=['GET'])
 def autonomiaDefinition():
     autonomiaUsu = request.args.get('autonomia')
     global autonomia;
@@ -81,7 +81,7 @@ def autonomiaDefinition():
     return( 'Nova autonomia:' + str(autonomiaUsu) + '<br>'
             'Autonomia antiga:' + str(autonomiaAntiga) )
 
-@app.route("/cadastraApp")
+@app.route("/cadastraApp", methods=['GET'])
 def cadastraApp():
     nomeApp = request.args.get('nomeApp')
     isCadastrado = False
@@ -95,7 +95,7 @@ def cadastraApp():
     else:
         return( 'App já está cadastrado')
 
-@app.route("/planejaVoo")
+@app.route("/planejaVoo", methods=['GET'])
 def planejaVoo():
 
     listaSites = []
@@ -123,7 +123,7 @@ def planejaVoo():
     return( 'O uso da autonomia está em  '+ str(percentual) +'%')
     
     
-@app.route("/solicitaDadosSensor")
+@app.route("/solicitaDadosSensor", methods=['GET'])
 def solicitaDadosSensor():
     nomeApp = request.args.get('nomeApp')
     tipoSensor = request.args.get('tipoSensor')
@@ -152,7 +152,7 @@ def runDroneMQTT(arg, arg2):
     print ("Done!")    
     ServiceSchedule.loop()
 
-@app.route("/setDados")
+@app.route("/setDados", methods=['GET'])
 def setDados():
     dados = request.args.get('data')
     print('msg no webservice:' + dados)
@@ -165,7 +165,7 @@ def setDados():
     
     
     
-@app.route("/getDados")
+@app.route("/getDados", methods=['GET'])
 def getDados():
     retorno = ''
     id = 1
