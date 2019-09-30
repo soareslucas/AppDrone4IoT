@@ -15,10 +15,6 @@ import os
 
 app = Flask(__name__)
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
-
 autonomia = 2500
 idSite = 1
 
@@ -71,6 +67,11 @@ def web_service():
     for s in listaSensores:
         retorno += str(s.getId())+ "&nbsp;!!&nbsp;" + s.getNome()+ "&nbsp;!!&nbsp;" + str(s.getQuantidade()) + "&nbsp;!!&nbsp;" + str(s.getSolicitado())+  "<br> "
     return retorno
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
 
 @app.route("/autonomia", methods=['GET'])
 def autonomiaDefinition():
