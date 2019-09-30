@@ -8,7 +8,7 @@ import numpy as np
 #import seaborn as sn
 import random
 #from mpl_toolkits import mplot3d
-import drone.Site as Site
+import Site as Site
 
 
 minimoEnergia = 0
