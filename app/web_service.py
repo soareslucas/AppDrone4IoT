@@ -6,10 +6,10 @@ Created on Jun 1, 2019
 from flask import Flask
 from flask import request
 import numpy as np
-import Otimizacao as otim
-import Sensor as Sensor
-import Site as Site
-import DroneMQTT as ServiceSchedule
+import app.Otimizacao as otim
+import app.Sensor as Sensor
+import app.Site as Site
+import app.DroneMQTT as ServiceSchedule
 from threading import Thread
 
 app = Flask(__name__)
