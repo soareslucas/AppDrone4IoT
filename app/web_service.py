@@ -68,11 +68,6 @@ def web_service():
         retorno += str(s.getId())+ "&nbsp;!!&nbsp;" + s.getNome()+ "&nbsp;!!&nbsp;" + str(s.getQuantidade()) + "&nbsp;!!&nbsp;" + str(s.getSolicitado())+  "<br> "
     return retorno
 
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
-
 @app.route("/autonomia", methods=['GET'])
 def autonomiaDefinition():
     autonomiaUsu = request.args.get('autonomia')
@@ -177,6 +172,11 @@ def getDados():
         
     return retorno
 
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
     
 
     
