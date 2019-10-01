@@ -3,3 +3,4 @@ requests==2.22.0
 PuLP==1.6.10
 numpy==1.17.2
 Flask==1.1.1
+gunicorn==19.9.0
