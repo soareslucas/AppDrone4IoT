@@ -5,9 +5,7 @@ from sklearn.cluster import KMeans
 from mpl_toolkits.mplot3d import axes3d, Axes3D
 
 Xyz =  np.random.randint(1000, size=(50, 3))
-
-Z =  np.zeros(50);
-    
+Z =  np.zeros(50); 
 Xyz[:, 2] = Z
 
 fig = plt.figure()
