@@ -11,10 +11,9 @@ Xyz[:, 2] = Z
 fig = plt.figure()
 ax = Axes3D(fig)
 
-print(Xyz);
+print(Xyz); 
 
 ax.scatter(Xyz[ : , 0], Xyz[ :, 1], Xyz[ :, 2], s = 50, c = "b")
-
 
 plt.show()
 
@@ -23,7 +22,8 @@ ax = Axes3D(fig)
 
 from sklearn.cluster import KMeans
 
-Kmean = KMeans(distance_threshold=10)
+n_clusters == 10
+Kmean = KMeans(n_clusters)
 Kmean.fit(Xyz)
 centroids = Kmean.cluster_centers_
 ax.scatter(Xyz[ : , 0], Xyz[ : , 1],  Xyz[ :, 2], s =50, c="b")
