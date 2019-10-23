@@ -13,6 +13,31 @@ import app.Site as Site
 
 minimoEnergia = 0
 
+# total number of clusters (customers)
+N = 0
+
+# total number of UAVs (vehicles)
+K = 1
+
+# total number of launch sites
+L = 1
+
+# total number of landing sites
+C = 1
+
+
+# i = index for traveling from node i
+# j = index for traveling to node j
+# k = index for the vehicle
+# xijk = binary variable indicating whether UAV k traveled from node i to j
+# cij = distance from node i to j
+# tijk = travel time from node i to node j for vehicle k
+# ti = arrival time of UAV at target i
+# tjk = arrival time of UAV k at landing site j
+# sik = service time for node i for UAV k
+# rk = max route time allowed for UAV k
+
+
 def getValueMinimoEnergia():
     global minimoEnergia;
     return(minimoEnergia)
