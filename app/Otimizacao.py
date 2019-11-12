@@ -3,7 +3,7 @@ Created on May 24, 2019
 
 @author: lucassoares
 '''
-from pulp import *
+import pulp as opt
 import numpy as np
 #import seaborn as sn
 import random
@@ -39,7 +39,7 @@ C = 1
 
 
 def getValueMinimoEnergia():
-    global minimoEnergia;
+    global minimoEnergia
     return(minimoEnergia)
 
 
@@ -80,24 +80,24 @@ def getMinimoEnergia(listaSites):
         K = 1 
 
         #create the problme
-        prob=LpProblem("vehicle",LpMinimize)
+        prob= opt.LpProblem("vehicle",opt.LpMinimize)
 
 
         #indicator variable if site i is connected to site j in the tour
-        x = LpVariable.dicts('x',distances, 0,1,LpBinary)
+        x = opt.LpVariable.dicts('x',distances, 0,1,opt.LpBinary)
         #dummy vars to eliminate subtours
-        u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
+        u = opt.LpVariable.dicts('u', sites, 0, len(sites)-1, opt.LpInteger)
 
 
         #the objective
-        cost = (lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ]))
+        cost = (opt.lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ]))
         prob+=cost
 
         for k in sites:
             #every site has exactly one inbound connection
-            prob+= lpSum([ x[(i,k)] for i in sites if (i,k) in x]) ==1
+            prob+= opt.lpSum([ x[(i,k)] for i in sites if (i,k) in x]) ==1
             #every site has exactly one outbound connection
-            prob+=lpSum([ x[(k,i)] for i in sites if (k,i) in x]) ==1
+            prob+=opt.lpSum([ x[(k,i)] for i in sites if (k,i) in x]) ==1
 
         
         #subtour elimination
@@ -110,7 +110,7 @@ def getMinimoEnergia(listaSites):
 
         prob.solve()
 
-        non_zero_edges = [ e for e in x if value(x[e]) != 0 ]
+        non_zero_edges = [ e for e in x if opt.value(x[e]) != 0 ]
         tours = get_next_site('org', non_zero_edges)
         tours = [ [e] for e in tours ]
 
@@ -122,7 +122,7 @@ def getMinimoEnergia(listaSites):
                 print(' -> '.join([ a for a,b in t]+['org']))
 
         
-        return(value(prob.objective))
+        return(opt.value(prob.objective))
 
 
 
@@ -162,29 +162,29 @@ def getMaximoDeSensores(listaSites, autonomia):
         K = 1 
 
         #create the problme
-        prob=LpProblem("vehicle",LpMaximize)
+        prob= opt.LpProblem("vehicle",opt.LpMaximize)
 
 
         #indicator variable if site i is connected to site j in the tour
-        x = LpVariable.dicts('x',distances, 0,1,LpBinary)
+        x = opt.LpVariable.dicts('x',distances, 0,1,opt.LpBinary)
         #dummy vars to eliminate subtours
-        u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
+        u = opt.LpVariable.dicts('u', sites, 0, len(sites)-1, opt.LpInteger)
 
 
         #the objective
-        cost = (lpSum([x[(i,j)] for (i,j) in x]))
+        cost = (opt.lpSum([x[(i,j)] for (i,j) in x]))
         prob+=cost
 
         for k in sites:
-                prob+= lpSum([ x[(i,k)] for i in sites if (i,k) in x]) == lpSum([ x[(k,i)] for i in sites if (k,i) in x])
+                prob+= opt.lpSum([ x[(i,k)] for i in sites if (i,k) in x]) == opt.lpSum([ x[(k,i)] for i in sites if (k,i) in x])
         
         for k in sites:
-                prob+= lpSum([ x[('org',k)] for k in sites if ('org',k) in x]) == 1
+                prob+= opt.lpSum([ x[('org',k)] for k in sites if ('org',k) in x]) == 1
         
         for k in sites:
-                prob+= lpSum([ x[(k,'org')] for k in sites if (k, 'org') in x]) == 1
+                prob+= opt.lpSum([ x[(k,'org')] for k in sites if (k, 'org') in x]) == 1
 
-        prob+= lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ]) <= autonomia
+        prob+= opt.lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ]) <= autonomia
 
         
         #subtour elimination
@@ -197,7 +197,7 @@ def getMaximoDeSensores(listaSites, autonomia):
 
         prob.solve()
 
-        non_zero_edges = [ e for e in x if value(x[e]) != 0 ]
+        non_zero_edges = [ e for e in x if opt.value(x[e]) != 0 ]
         tours = get_next_site('org', non_zero_edges)
         tours = [ [e] for e in tours ]
 
@@ -213,18 +213,18 @@ def getMaximoDeSensores(listaSites, autonomia):
         for i in sites:
             for j in sites:
                 if i != j :
-                    distanciaTotal += value(x[(i,j)])  * distances[(i,j)]
+                    distanciaTotal += opt.value(x[(i,j)])  * distances[(i,j)]
         
         totalSensores = -1
         for i in sites:
             for j in sites:
                 if i != j:
-                    totalSensores += value(x[(i,j)])
+                    totalSensores += opt.value(x[(i,j)])
             
 
-        maxSensores = value(prob.objective)
+        maxSensores = opt.value(prob.objective)
         
-        global minimoEnergia;
+        global minimoEnergia
         
         minimoEnergia = getMinimoEnergiaComMaxSensores(maxSensores, distances, sites)
             
@@ -233,29 +233,29 @@ def getMaximoDeSensores(listaSites, autonomia):
     
 def getMinimoEnergiaComMaxSensores(maxSensores, distances, sites):
        #create the problme
-        prob=LpProblem("vehicle",LpMinimize)
+        prob= opt.LpProblem("vehicle",opt.LpMinimize)
 
 
         #indicator variable if site i is connected to site j in the tour
-        x = LpVariable.dicts('x',distances, 0,1,LpBinary)
+        x = opt.LpVariable.dicts('x',distances, 0,1,opt.LpBinary)
         #dummy vars to eliminate subtours
-        u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
+        u = opt.LpVariable.dicts('u', sites, 0, len(sites)-1, opt.LpInteger)
 
 
         #the objective
-        cost =  ( lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ])) 
+        cost =  ( opt.lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ])) 
         prob+=cost
 
         for k in sites:
-                prob+= lpSum([ x[(i,k)] for i in sites if (i,k) in x]) == lpSum([ x[(k,i)] for i in sites if (k,i) in x])
+                prob+=opt.lpSum([ x[(i,k)] for i in sites if (i,k) in x]) == opt.lpSum([ x[(k,i)] for i in sites if (k,i) in x])
         
         for k in sites:
-                prob+= lpSum([ x[('org',k)] for k in sites if ('org',k) in x]) == 1
+                prob+= opt.lpSum([ x[('org',k)] for k in sites if ('org',k) in x]) == 1
         
         for k in sites:
-                prob+= lpSum([ x[(k,'org')] for k in sites if (k, 'org') in x]) == 1
+                prob+= opt.lpSum([ x[(k,'org')] for k in sites if (k, 'org') in x]) == 1
         
-        prob+= lpSum([x[(i,j)] for (i,j) in x]) == maxSensores
+        prob+= opt.lpSum([x[(i,j)] for (i,j) in x]) == maxSensores
         
         
         #subtour elimination
@@ -268,5 +268,5 @@ def getMinimoEnergiaComMaxSensores(maxSensores, distances, sites):
 
         prob.solve()
         
-        return value(prob.objective)
+        return opt.value(prob.objective)
 

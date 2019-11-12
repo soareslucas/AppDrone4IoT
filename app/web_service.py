@@ -71,7 +71,7 @@ def web_service():
 @app.route("/autonomia", methods=['GET'])
 def autonomiaDefinition():
     autonomiaUsu = request.args.get('autonomia')
-    global autonomia;
+    global autonomia
     autonomiaAntiga = autonomia
     autonomia = float(autonomiaUsu)
     return( 'Nova autonomia:' + str(autonomiaUsu) + '<br>'
@@ -155,7 +155,7 @@ def setDados():
     
     dados = dados.replace('b','')
 
-    dadosColetados.append(dados);
+    dadosColetados.append(dados)
     
     return 'ok'
     
