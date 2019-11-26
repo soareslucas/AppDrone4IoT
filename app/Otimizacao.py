@@ -25,7 +25,6 @@ L = 1
 # total number of landing sites
 C = 1
 
-
 # i = index for traveling from node i
 # j = index for traveling to node j
 # k = index for the vehicle
@@ -79,15 +78,12 @@ def getMinimoEnergia(listaSites):
         #the number of sales people 
         K = 1 
 
-        #create the problme
+        #create the problem
         prob= opt.LpProblem("vehicle",opt.LpMinimize)
-
-
         #indicator variable if site i is connected to site j in the tour
         x = opt.LpVariable.dicts('x',distances, 0,1,opt.LpBinary)
         #dummy vars to eliminate subtours
         u = opt.LpVariable.dicts('u', sites, 0, len(sites)-1, opt.LpInteger)
-
 
         #the objective
         cost = (opt.lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ]))
