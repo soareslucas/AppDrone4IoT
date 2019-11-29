@@ -12,52 +12,60 @@ import app.Site as Site
 import app.DroneMQTT as ServiceSchedule
 from threading import Thread
 import os
+import random
+import sys
+import math
 
 app = Flask(__name__)
 
+
+started = 'false'
+latitude = 48.87
+longitude = 02.36
 autonomia = 2500
 idSite = 1
 
-sites = []
-for i in range(0, 3):
-    site = Site.Site(str(idSite), (np.random.randint(1,1000), np.random.randint(1,1000), np.random.randint(1,100) ))
-    sites.append(site)
-    idSite += 1
-    
-sensorUmidade = Sensor.Sensor(1,"umidade",3,sites)
-listaSensores = [sensorUmidade]
-
-sites = []
-for i in range(0, 4):
-    site = Site.Site(str(idSite), (np.random.randint(1,1000), np.random.randint(1,1000), np.random.randint(1,100) ))
-    sites.append(site)
-    idSite += 1
-    
-sensor = Sensor.Sensor(2,"temperatura",4,sites)
-listaSensores.append(sensor)
-
-sites = []
-for i in range(0, 2):
-    site = Site.Site(str(idSite), (np.random.randint(1,1000), np.random.randint(1,1000), np.random.randint(1,100) ))
-    sites.append(site)
-    idSite += 1
-    
-sensor = Sensor.Sensor(3,"phSolo",2,sites)
-listaSensores.append(sensor)
+def generate_random_data(lat, lon, num_rows,idSite):
+    sitesTemp = []
+    for _ in range(num_rows):
+        dec_lat = random.random()/100
+        dec_lon = random.random()/100
+        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,100)) )
+        idSite += 1
+        sitesTemp.append(site)
+    return sitesTemp
 
 
-sites = []
-for i in range(0, 5):
-    site = Site.Site(str(idSite), (np.random.randint(1,1000), np.random.randint(1,1000), np.random.randint(1,100) ))
-    sites.append(site)
-    idSite += 1
-    
-sensor = Sensor.Sensor(4,"lixeira",5,sites)
-listaSensores.append(sensor)
- 
+
+if( started == 'false'):
+    sitesList = generate_random_data(latitude, longitude, 3, idSite)
+    sensor = Sensor.Sensor(1,"umidade",3, sitesList)
+    lastSite = sitesList[len(sitesList) -1]
+    idSite = lastSite.getId()
+    listaSensores = [sensor]
+
+    sitesList = generate_random_data(latitude, longitude, 4, int(idSite))
+    sensor = Sensor.Sensor( 2,"temperatura",4, sitesList)
+    lastSite = sitesList[len(sitesList) -1]
+    idSite = lastSite.getId()
+    listaSensores.append(sensor)
+
+    sitesList = generate_random_data(latitude, longitude, 2, int(idSite))
+    sensor = Sensor.Sensor( 3,"phSolo",2,sitesList)
+    lastSite = sitesList[len(sitesList) -1]
+    idSite = lastSite.getId()
+    listaSensores.append(sensor)
+
+    sitesList = generate_random_data(latitude, longitude, 5, int(idSite))
+    sensor = Sensor.Sensor(4,"lixeira",5, sitesList)
+    lastSite = sitesList[len(sitesList) -1]
+    idSite = lastSite.getId()
+    listaSensores.append(sensor)  
+
+    started = 'true'
+
 
 listaAppsCadastradas = []
-
 dadosColetados = []
 
 
@@ -101,6 +109,8 @@ def planejaVoo():
             sites = x.getSites()
             for y in sites:
                 listaSites.append(y)
+
+    print('Lista de Sites: ' +str(listaSites))
                 
     
     minimoEnergia = otim.getMinimoEnergia(listaSites)
