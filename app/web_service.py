@@ -17,12 +17,13 @@ import sys
 import math
 
 app = Flask(__name__)
-
-
 started = 'false'
 latitude = 48.87
 longitude = 02.36
-autonomia = 2500
+
+# Autonomia em J |||  (59940 - 1500 mAh - 11.1V )   (99900 - 2500 mAh - 11.1V ) (159840 - 4000 mAh - 11.1V )
+autonomia = 59940
+
 idSite = 1
 
 def generate_random_data(lat, lon, num_rows,idSite):
@@ -35,39 +36,42 @@ def generate_random_data(lat, lon, num_rows,idSite):
         sitesTemp.append(site)
     return sitesTemp
 
-
-
 if( started == 'false'):
     sitesList = generate_random_data(latitude, longitude, 3, idSite)
     sensor = Sensor.Sensor(1,"umidade",3, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
+    print(idSite)
     listaSensores = [sensor]
 
+    idSite = int(idSite) + 1
     sitesList = generate_random_data(latitude, longitude, 4, int(idSite))
     sensor = Sensor.Sensor( 2,"temperatura",4, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
+    print(idSite)
     listaSensores.append(sensor)
 
+    idSite = int(idSite) + 1
     sitesList = generate_random_data(latitude, longitude, 2, int(idSite))
     sensor = Sensor.Sensor( 3,"phSolo",2,sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
+    print(idSite)
     listaSensores.append(sensor)
 
+    idSite = int(idSite) + 1
     sitesList = generate_random_data(latitude, longitude, 5, int(idSite))
     sensor = Sensor.Sensor(4,"lixeira",5, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
+    print(idSite)
     listaSensores.append(sensor)  
 
     started = 'true'
 
-
 listaAppsCadastradas = []
 dadosColetados = []
-
 
 @app.route("/")
 def web_service():
@@ -103,7 +107,6 @@ def cadastraApp():
 def planejaVoo():
 
     listaSites = []
-                
     for x in listaSensores:
         if x.getSolicitado() == True:
             sites = x.getSites()
@@ -111,23 +114,14 @@ def planejaVoo():
                 listaSites.append(y)
 
     print('Lista de Sites: ' +str(listaSites))
-                
-    
     minimoEnergia = otim.getMinimoEnergia(listaSites)
-    
     percentual = (float(minimoEnergia)/autonomia) * 100
     
-    if percentual > 80:
-
-        retorno = 'O uso da autonomia para visitar todos os sensores está em  ' + str(percentual) + '% <br>' + 'Estatísticas para realização do voo: <br>'  + otim.getMaximoDeSensores(listaSites, autonomia)
-     
-       # thread = Thread(target=runDroneMQTT, args=("MQTT", "CLIENT"))
-        #thread.start()
+    retorno = 'O uso da autonomia para visitar todos os sensores está em  ' + str(percentual) + '% <br>' + 'Estatísticas para realização do voo: <br>'  + otim.getMaximoDeSensores(listaSites, autonomia)
+    # thread = Thread(target=runDroneMQTT, args=("MQTT", "CLIENT"))
+    #thread.start()
         
-        return (retorno)
-
-    return( 'O uso da autonomia está em  '+ str(percentual) +'%')
-    
+    return (retorno)    
     
 @app.route("/solicitaDadosSensor", methods=['GET'])
 def solicitaDadosSensor():
@@ -162,9 +156,7 @@ def runDroneMQTT(arg, arg2):
 def setDados():
     dados = request.args.get('data')
     print('msg no webservice:' + dados)
-    
     dados = dados.replace('b','')
-
     dadosColetados.append(dados)
     
     return 'ok'
