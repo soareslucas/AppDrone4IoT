@@ -82,10 +82,7 @@ def generate_file_flight_plan(tours, listaSites):
 
         text+=  str(index)+'       0       3       16      0.000000        0.000000        0.000000        0.000000        48.878940       2.368091        000.000000      1'
 
-        file = open("flightplan.txt", "w") 
-        file.write(text) 
-        file.close() 
-
+        return text
 
 def calculateEnergyCost(p1,p2):
         # velocity in m/s

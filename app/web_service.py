@@ -15,14 +15,17 @@ import os
 import random
 import sys
 import math
+from flask import Response
 
 app = Flask(__name__)
 started = 'false'
 latitude = 48.87
 longitude = 02.36
 
+textFile = ''
+
 # Autonomia em J |||  (59940 - 1500 mAh - 11.1V )   (99900 - 2500 mAh - 11.1V ) (159840 - 4000 mAh - 11.1V )
-autonomia = 59940
+autonomy = 59940
 
 idSite = 1
 
@@ -35,6 +38,13 @@ def generate_random_data(lat, lon, num_rows,idSite):
         idSite += 1
         sitesTemp.append(site)
     return sitesTemp
+
+def generate_file_data():
+        global textFile
+        file = open("flightplan.txt", "w") 
+        file.write(textFile) 
+        return file
+
 
 if( started == 'false'):
     sitesList = generate_random_data(latitude, longitude, 3, idSite)
@@ -80,17 +90,27 @@ def web_service():
         retorno += str(s.getId())+ "&nbsp;!!&nbsp;" + s.getNome()+ "&nbsp;!!&nbsp;" + str(s.getQuantidade()) + "&nbsp;!!&nbsp;" + str(s.getSolicitado())+  "<br> "
     return retorno
 
+@app.route("/get-file")
+def get_file():
+    results = generate_file_data()
+    generator = (cell for row in results
+                    for cell in row)
+    return Response(generator,
+                       mimetype="text/plain",
+                       headers={"Content-Disposition":
+                                    "attachment;filename=flightplan.mavlink"})
+
 @app.route("/autonomia", methods=['GET'])
-def autonomiaDefinition():
-    autonomiaUsu = request.args.get('autonomia')
-    global autonomia
-    autonomiaAntiga = autonomia
-    autonomia = float(autonomiaUsu)
-    return( 'Nova autonomia:' + str(autonomiaUsu) + '<br>'
-            'Autonomia antiga:' + str(autonomiaAntiga) )
+def set_autonomy():
+    new_autonomy = request.args.get('autonomia')
+    global autonomy
+    old_autonomy = autonomy
+    autonomy = float(new_autonomy)
+    return( 'Nova autonomia:' + str(autonomy) + '<br>'
+            'Autonomia antiga:' + str(old_autonomy) )
 
 @app.route("/cadastraApp", methods=['GET'])
-def cadastraApp():
+def create_app():
     nomeApp = request.args.get('nomeApp')
     isCadastrado = False
     for x in listaAppsCadastradas:
@@ -104,7 +124,7 @@ def cadastraApp():
         return( 'App já está cadastrado')
 
 @app.route("/planejaVoo", methods=['GET'])
-def planejaVoo():
+def plan_flight():
 
     listaSites = []
     for x in listaSensores:
@@ -117,18 +137,18 @@ def planejaVoo():
     minimoEnergia = otim.getMinimoEnergia(listaSites)
     percentual = (float(minimoEnergia)/autonomia) * 100
     
-    retorno = 'O uso da autonomia para visitar todos os sensores está em  ' + str(percentual) + '% <br>' + 'Estatísticas para realização do voo: <br>'  + otim.getMaximoDeSensores(listaSites, autonomia)
-    # thread = Thread(target=runDroneMQTT, args=("MQTT", "CLIENT"))
-    #thread.start()
+    retorno = ('O uso da autonomia para visitar todos os sensores está em  ' 
+    + str(percentual) + '% <br>'
+     + 'Estatísticas para realização do voo: <br>' 
+      + otim.getMaximoDeSensores(listaSites, autonomia) )
         
     return (retorno)    
     
 @app.route("/solicitaDadosSensor", methods=['GET'])
-def solicitaDadosSensor():
+def subscribe_for_sensors_data():
     nomeApp = request.args.get('nomeApp')
     tipoSensor = request.args.get('tipoSensor')
 
-    
     isCadastrado = False
     
     for x in listaAppsCadastradas:
@@ -145,15 +165,15 @@ def solicitaDadosSensor():
                 x.setSolicitado(True)
                 listaSensores.append(x)
     
-    return (planejaVoo())          
+    return (plan_flight())          
 
-def runDroneMQTT(arg, arg2):
+def run_drone_mqtt(arg, arg2):
     print ("Running thread! Args:", (arg, arg2))
     print ("Done!")    
     ServiceSchedule.loop()
 
 @app.route("/setDados", methods=['GET'])
-def setDados():
+def set_data():
     dados = request.args.get('data')
     print('msg no webservice:' + dados)
     dados = dados.replace('b','')
@@ -162,18 +182,15 @@ def setDados():
     return 'ok'
     
     
-    
 @app.route("/getDados", methods=['GET'])
-def getDados():
+def get_data():
     retorno = ''
     id = 1
-    
     for s in dadosColetados:
         retorno += str(id)+': ' + str (s)+  "<br> "
         id += 1
         
     return retorno
-
 
 
 if __name__ == "__main__":

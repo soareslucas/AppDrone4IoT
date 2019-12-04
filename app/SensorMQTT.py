@@ -3,10 +3,6 @@ Created on May 30, 2019
 
 @author: lucassoares
 '''
-
-
-# -*- coding: utf-8 -*-
-
 import paho.mqtt.client as mqtt
 import sys
 
