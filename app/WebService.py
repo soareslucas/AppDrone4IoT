@@ -9,7 +9,7 @@ import numpy as np
 import app.Otimizacao as otim
 import app.Sensor as Sensor
 import app.Site as Site
-import app.DroneMQTT as ServiceSchedule
+#import app.DroneMQTT as ServiceSchedule
 from threading import Thread
 import os
 import random
@@ -19,8 +19,8 @@ from flask import Response
 
 app = Flask(__name__)
 started = 'false'
-latitude = 48.87
-longitude = 02.36
+latitude = 48.8790
+longitude = 2.3674
 
 textFile = ''
 
@@ -32,9 +32,9 @@ idSite = 1
 def generate_random_data(lat, lon, num_rows,idSite):
     sitesTemp = []
     for _ in range(num_rows):
-        dec_lat = random.random()/100
-        dec_lon = random.random()/100
-        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,100)) )
+        dec_lat = random.random()/10000
+        dec_lon = random.random()/10000
+        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,20)) )
         idSite += 1
         sitesTemp.append(site)
     return sitesTemp
@@ -135,12 +135,12 @@ def plan_flight():
 
     print('Lista de Sites: ' +str(listaSites))
     minimoEnergia = otim.getMinimoEnergia(listaSites)
-    percentual = (float(minimoEnergia)/autonomia) * 100
+    percentual = (float(minimoEnergia)/autonomy) * 100
     
     retorno = ('O uso da autonomia para visitar todos os sensores está em  ' 
     + str(percentual) + '% <br>'
      + 'Estatísticas para realização do voo: <br>' 
-      + otim.getMaximoDeSensores(listaSites, autonomia) )
+      + otim.getMaximoDeSensores(listaSites, autonomy) )
         
     return (retorno)    
     
@@ -170,7 +170,7 @@ def subscribe_for_sensors_data():
 def run_drone_mqtt(arg, arg2):
     print ("Running thread! Args:", (arg, arg2))
     print ("Done!")    
-    ServiceSchedule.loop()
+  #  ServiceSchedule.loop()
 
 @app.route("/setDados", methods=['GET'])
 def set_data():

@@ -11,6 +11,9 @@ import random
 #from mpl_toolkits import mplot3d
 import app.Site as Site
 
+import utm
+
+
 minimoEnergia = 0
 
 def getValueMinimoEnergia():
@@ -50,11 +53,11 @@ def get_line_flight_plan(sites, id):
 def generate_file_flight_plan(tours, listaSites):
         text = ('GC WPL 110\n'
         + '0       1       0       0       0       0       0       0       0       0       0       1\n' 
-        + '1       0       3       16      0.000000        0.000000        0.000000        0.000000        48.878940       2.368091        000.000000      1\n')
+        + '1       0       3       16      0.000000        0.000000        0.000000        0.000000        48.879025       2.367450        000.000000      1\n')
         
         tourFlightPlan = ''
         for t in tours:
-                tourFlightPlan += (str([ get_line_flight_plan(listaSites, a) for a,b in t if a != 'org' ] ) )
+                tourFlightPlan += (str([ get_line_flight_plan(listaSites, a) for a,b in t if a != '0' ] ) )
 
         tourFlightPlan = tourFlightPlan.replace(']', '')
         tourFlightPlan = tourFlightPlan.replace('[', '')
@@ -80,8 +83,11 @@ def generate_file_flight_plan(tours, listaSites):
                 index += 1
                 text += str(fpTemp) + '\n'
 
-        text+=  str(index)+'       0       3       16      0.000000        0.000000        0.000000        0.000000        48.878940       2.368091        000.000000      1'
+        text+=  str(index)+'       0       3       16      0.000000        0.000000        0.000000        0.000000        48.879025       2.367450        000.000000      1'
 
+        file = open("flightplan.mavlink", "w") 
+        file.write(text) 
+        file.close()
         return text
 
 def calculateEnergyCost(p1,p2):
@@ -136,14 +142,16 @@ def calculateEnergyCost(p1,p2):
 
 def getMinimoEnergia(listaSites):
     
-        sites = ['org']
+        sites = ['0']
                 
         for site in listaSites:
             sites.append(site.getId())
 
         #make some positions (so we can plot this)
         positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
-        positions['org']=(453668.79, 5414190.73,0)
+
+        utm_conversion = utm.from_latlon(48.879049,2.367448)
+        positions['0']=(utm_conversion[0], utm_conversion[1], 0)
 
         #calculate all the pairs
         distances=dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
@@ -181,28 +189,28 @@ def getMinimoEnergia(listaSites):
         N=len(sites)/K
         for i in sites:
                 for j in sites:
-                        if i != j and (i != 'org' and j!= 'org') and (i,j) in x:
+                        if i != j and (i != '0' and j!= '0') and (i,j) in x:
                                 prob += u[i] - u[j] <= (N)*(1-x[(i,j)]) - 1
 
 
         prob.solve()
 
         non_zero_edges = [ e for e in x if value(x[e]) != 0 ]
-        tours = get_next_site('org', non_zero_edges)
+        tours = get_next_site('0', non_zero_edges)
         tours = [ [e] for e in tours ]
 
         for t in tours:
-                while t[-1][1] !='org':
+                while t[-1][1] !='0':
                         t.append(get_next_site(t[-1][1], non_zero_edges)[-1])
                 
         for t in tours:
-                print(' -> '.join([ a for a,b in t]+['org']))
+                print(' -> '.join([ a for a,b in t]+['0']))
 
         return(value(prob.objective))
 
 
 def getMaximoDeSensores(listaSites, autonomia):
-        sites = ['org']
+        sites = ['0']
                 
         for site in listaSites:
             sites.append(site.getId())
@@ -210,7 +218,8 @@ def getMaximoDeSensores(listaSites, autonomia):
         #make some positions (so we can plot this)
         positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
         
-        positions['org']=(453668.79, 5414190.73,0)
+        utm_conversion = utm.from_latlon(48.879049,2.367448)
+        positions['0']=(utm_conversion[0], utm_conversion[1], 0)
 
         #straight line distance for simplicity
         d = lambda p1,p2: np.sqrt( (p1[0]-p2[0])**2+ (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2)
@@ -239,10 +248,10 @@ def getMaximoDeSensores(listaSites, autonomia):
                 prob+= lpSum([ x[(i,k)] for i in sites if (i,k) in x]) == lpSum([ x[(k,i)] for i in sites if (k,i) in x])
         
         for k in sites:
-                prob+= lpSum([ x[('org',k)] for k in sites if ('org',k) in x]) == 1
+                prob+= lpSum([ x[('0',k)] for k in sites if ('0',k) in x]) == 1
         
         for k in sites:
-                prob+= lpSum([ x[(k,'org')] for k in sites if (k, 'org') in x]) == 1
+                prob+= lpSum([ x[(k,'0')] for k in sites if (k, '0') in x]) == 1
 
         prob+= lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ]) <= autonomia
 
@@ -251,7 +260,7 @@ def getMaximoDeSensores(listaSites, autonomia):
         N=len(sites)/K
         for i in sites:
                 for j in sites:
-                        if i != j and (i != 'org' and j!= 'org') and (i,j) in x:
+                        if i != j and (i != '0' and j!= '0') and (i,j) in x:
                                 prob += u[i] - u[j] <= (N)*(1-x[(i,j)]) - 1
 
         prob.solve()                
@@ -277,7 +286,7 @@ def getMaximoDeSensores(listaSites, autonomia):
     
 def getMinimoEnergiaComMaxSensores(maxSensores, distances, listaSites):
 
-        sites = ['org']
+        sites = ['0']
                 
         for site in listaSites:
             sites.append(site.getId())
@@ -296,10 +305,10 @@ def getMinimoEnergiaComMaxSensores(maxSensores, distances, listaSites):
                 prob+= lpSum([ x[(i,k)] for i in sites if (i,k) in x]) == lpSum([ x[(k,i)] for i in sites if (k,i) in x])
         
         for k in sites:
-                prob+= lpSum([ x[('org',k)] for k in sites if ('org',k) in x]) == 1
+                prob+= lpSum([ x[('0',k)] for k in sites if ('0',k) in x]) == 1
         
         for k in sites:
-                prob+= lpSum([ x[(k,'org')] for k in sites if (k, 'org') in x]) == 1
+                prob+= lpSum([ x[(k,'0')] for k in sites if (k, '0') in x]) == 1
         
         prob+= lpSum([x[(i,j)] for (i,j) in x]) == maxSensores
         
@@ -307,21 +316,21 @@ def getMinimoEnergiaComMaxSensores(maxSensores, distances, listaSites):
         N=len(sites)/1
         for i in sites:
                 for j in sites:
-                        if i != j and (i != 'org' and j!= 'org') and (i,j) in x:
+                        if i != j and (i != '0' and j!= '0') and (i,j) in x:
                                 prob += u[i] - u[j] <= (N)*(1-x[(i,j)]) - 1
 
         prob.solve()
 
         non_zero_edges = [ e for e in x if value(x[e]) != 0 ]
-        tours = get_next_site('org', non_zero_edges)
+        tours = get_next_site('0', non_zero_edges)
         tours = [ [e] for e in tours ]
 
         for t in tours:
-                while t[-1][1] !='org':
+                while t[-1][1] !='0':
                         t.append(get_next_site(t[-1][1], non_zero_edges)[-1])
 
         for t in tours:
-                print(' -> '.join([ a for a,b in t]+['org']))
+                print(' -> '.join([ a for a,b in t]+['0']))
 
 
         generate_file_flight_plan(tours, listaSites)

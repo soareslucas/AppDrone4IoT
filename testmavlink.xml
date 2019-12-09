@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<mavlink>
+
+    <include>common.xml</include>
+    <!-- <version>9</version> -->
+    <dialect>8</dialect>
+
+    <enums>
+        <!-- Enums are defined here (optional) -->
+
+        <enum name="MAV_CMD">
+            <description>Commands to be executed by the MAV. They can be executed on user request, or as part of a mission script. If the action is used in a mission, the parameter mapping to the waypoint/mission message is as follows: Param 1, Param 2, Param 3, Param 4, X: Param 5, Y:Param 6, Z:Param 7. This command list is similar what ARINC 424 is for commercial aircraft: A data format how to interpret waypoint/mission data.</description>
+            <entry value="16" name="MAV_CMD_NAV_WAYPOINT">
+                <description>Navigate to waypoint.</description>
+                <param index="1">0</param>
+                <param index="2">0</param>
+                <param index="3">0</param>
+                <param index="4">NaN</param>
+                <param index="5">48.879025</param>
+                <param index="6">2.367450</param>
+                <param index="7">000.000000</param>
+            </entry>
+            <entry value="16" name="MAV_CMD_NAV_WAYPOINT">
+                <description>Navigate to waypoint.</description>
+                <param index="1">15</param>
+                <param index="2">0</param>
+                <param index="3">0</param>
+                <param index="4">NaN</param>
+                <param index="5">48.879025</param>
+                <param index="6">2.367450</param>
+                <param index="7">006.000000</param>
+            </entry>
+
+
+            <entry value="16" name="MAV_CMD_NAV_WAYPOINT">
+                <description>Navigate to waypoint.</description>
+                <param index="1">0</param>
+                <param index="2">0</param>
+                <param index="3">0</param>
+                <param index="4">NaN</param>
+                <param index="5">48.879065</param>
+                <param index="6">2.367466</param>
+                <param index="7">000.000000</param>
+            </entry>
+
+
+        </enum>
+    </enums>
+
+</mavlink>
