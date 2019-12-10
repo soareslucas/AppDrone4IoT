@@ -4,49 +4,17 @@ This project aims to provide a uav flight plan through a trajectory optimization
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-TODO - links to download bebop_autonomy and sphinx
+TODO - links to download bebop_autonomy (Driver ROS) and parrot sphinx
 
 ### Prerequisites
 
 What things you need to install the software and how to install them
-
-```
-Give examples
-```
 
 ### Installing
 
 A step by step series of examples that tell you how to get a development env running
 
 Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running simulations
-
-### Setting up the environment 
-
-
-Once you got all steps of the installation you're gonna need set up the environment
-
-```
-sudo systemctl start firmwared.service
-
-```
-
-
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -65,9 +33,50 @@ sudo systemctl start firmwared.service
   <!-- 'wlan0' may need to be replaced the actual wifi interface name -->
   <stolen_interface>wlan0:eth0:192.168.42.1/24</stolen_interface>
 </drone>
+```
+
+End with an example of getting some data out of the system or using it for a little demo
+
+## Running simulations
+
+### Starting firmware 
+
+
+Once you got all steps of the installation you're gonna need initiate the firmware service.
+If you're gonna run a simulation for Bebop 2, open the configuration file:
+
+```
+nano opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone
+
+```
+
+Make sure it looks like this:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<drone
+  name="bebop2"
+  firmware="http://plf.parrot.com/sphinx/firmwares/ardrone3/milos_pc/latest/images/ardrone3-milos_pc.ext2.zip"
+  hardware="milosboard">
+  <machine_params
+    low_gpu="0"
+    with_front_cam="1"
+    with_hd_battery="0"
+    with_flir="0"
+    flir_pos="tilted"/>
+  <pose>default</pose>
+  <interface>eth1</interface>
+  <!-- 'wlan0' may need to be replaced the actual wifi interface name -->
+  <stolen_interface>wlan0:eth0:192.168.42.1/24</stolen_interface>
+</drone>
+```
 
 
 ```
+sudo systemctl start firmwared.service
+
+```
+
 
 End with an example of getting some data out of the system or using it for a little demo
 
