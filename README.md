@@ -4,73 +4,37 @@ This project aims to provide a uav flight plan through a trajectory optimization
 
 ## Getting Started
 
-TODO - links to download bebop_autonomy (Driver ROS) and parrot sphinx
+TODO - links to download bebop_autonomy (Driver ROS) and parrot sphinx.
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+TODO - What things you need to install the software and how to install them.
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
+TODO - A step by step series of examples that tell you how to get a development env running
 
-Say what the step will be
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<drone
-  name="bebop2"
-  firmware="http://plf.parrot.com/sphinx/firmwares/ardrone3/milos_pc/latest/images/ardrone3-milos_pc.ext2.zip"
-  hardware="milosboard">
-  <machine_params
-    low_gpu="0"
-    with_front_cam="1"
-    with_hd_battery="0"
-    with_flir="0"
-    flir_pos="tilted"/>
-  <pose>default</pose>
-  <interface>eth1</interface>
-  <!-- 'wlan0' may need to be replaced the actual wifi interface name -->
-  <stolen_interface>wlan0:eth0:192.168.42.1/24</stolen_interface>
-</drone>
-```
-
-End with an example of getting some data out of the system or using it for a little demo
+TODO - Say what the step will be
 
 ## Running simulations
 
 ### Starting firmware 
 
+Once you got all steps of the installation you need start the firmware service.
 
-Once you got all steps of the installation you're gonna need initiate the firmware service.
-If you're gonna run a simulation for Bebop 2, open the configuration file:
-
-```
-nano opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone
+Before start the firmware service make sure there isn't a instance already running by looking for it.
 
 ```
+ps ax|grep firmwared
 
-Make sure it looks like this:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<drone
-  name="bebop2"
-  firmware="http://plf.parrot.com/sphinx/firmwares/ardrone3/milos_pc/latest/images/ardrone3-milos_pc.ext2.zip"
-  hardware="milosboard">
-  <machine_params
-    low_gpu="0"
-    with_front_cam="1"
-    with_hd_battery="0"
-    with_flir="0"
-    flir_pos="tilted"/>
-  <pose>default</pose>
-  <interface>eth1</interface>
-  <!-- 'wlan0' may need to be replaced the actual wifi interface name -->
-  <stolen_interface>wlan0:eth0:192.168.42.1/24</stolen_interface>
-</drone>
 ```
 
+If you find any other:
+
+```
+sudo systemctl stop firmwared.service
+
+```
 
 ```
 sudo systemctl start firmwared.service
@@ -80,21 +44,49 @@ sudo systemctl start firmwared.service
 
 End with an example of getting some data out of the system or using it for a little demo
 
-### Break down into end to end tests
+### Executing the simulator
 
-Explain what these tests test and why
+If you're running a simulation for Bebop 2, open the configuration file:
 
 ```
-Give an example
+nano opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone
+
 ```
+I rather to keep the file the same way the installation create. Make sure it looks like this:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<drone
+  name="bebop2"
+  firmware="http://plf.parrot.com/sphinx/firmwares/ardrone3/milos_pc/latest/images/ardrone3-milos_pc.ext2.zip"
+  hardware="milosboard">
+  <machine_params
+    low_gpu="0"
+    with_front_cam="1"
+    with_hd_battery="0"
+    with_flir="0"
+    flir_pos="tilted"/>
+  <pose>default</pose>
+  <interface>eth1</interface>
+  <!-- 'wlan0' may need to be replaced the actual wifi interface name -->
+  <stolen_interface>wlan0:eth0:192.168.42.1/24</stolen_interface>
+</drone>
+
+```
+
+Some parameters are changed by executing the simulator.
+
+```
+sphinx  /opt/parrot-sphinx/usr/share/sphinx/worlds/outdoor_5.world /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::with_front_cam=false::stolen_interface=wlp4s0:wlp4s0:192.168.42.1/24
+
+```
+
 
 ### And coding style tests
 
 Explain what these tests test and why
 
-```
-Give an example
-```
+
 
 ## Deployment
 
