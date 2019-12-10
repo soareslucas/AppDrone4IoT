@@ -26,19 +26,16 @@ Before start the firmware service make sure there isn't a instance already runni
 
 ```
 ps ax|grep firmwared
-
 ```
 
 If you find any other:
 
 ```
 sudo systemctl stop firmwared.service
-
 ```
 
 ```
 sudo systemctl start firmwared.service
-
 ```
 
 
