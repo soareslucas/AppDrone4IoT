@@ -34,10 +34,17 @@ If you find any other:
 sudo systemctl stop firmwared.service
 ```
 
+So to start the firmware:
+
 ```
 sudo systemctl start firmwared.service
 ```
 
+Verify if it's running:
+
+```
+fdc ping
+```
 
 End with an example of getting some data out of the system or using it for a little demo
 
@@ -71,10 +78,20 @@ I rather to keep the file the same way the installation create. Make sure it loo
 
 ```
 
-Some parameters are changed by executing the simulator.
+Some parameters are changed by executing the simulator. So you can set false to the use of frontal camera,
+and pass the Wi-Fi interface name.
+
+For execute the simulator:
+```
+sphinx /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::with_front_cam=false::stolen_interface=wlp4s0:wlp4s0:192.168.42.1/24
 
 ```
-sphinx  /opt/parrot-sphinx/usr/share/sphinx/worlds/outdoor_5.world /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::with_front_cam=false::stolen_interface=wlp4s0:wlp4s0:192.168.42.1/24
+
+If you wanna see it with a scenario:
+
+```
+sphinx /opt/parrot-sphinx/usr/share/sphinx/worlds/outdoor_5.world 
+ /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::with_front_cam=false::stolen_interface=wlp4s0:wlp4s0:192.168.42.1/24
 
 ```
 
