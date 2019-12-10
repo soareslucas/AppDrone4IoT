@@ -1,6 +1,6 @@
 # AppDrone4IoT: Flights Scheduling Service and Trajectory Optimization of UAV as Data Mule
 
-This project aims to provide a uav flight plan through a trajectory optimization algorithm, to generate a mavlink file, integrating with ROS driver in order to simulate a flight in sphinx.
+This project aims to provide a uav flight plan through a trajectory optimization algorithm and generate a mavlink file which is used by ROS driver in order to run a simulated flight in sphinx.
 
 ## Getting Started
 
@@ -20,7 +20,7 @@ TODO - Say what the step will be
 
 ### Starting firmware 
 
-Once you got all steps of the installation you need start the firmware service.
+Once you got all steps of the installation you need to start the firmware service.
 
 Before start the firmware service make sure there isn't a instance already running by looking for it.
 
@@ -28,7 +28,7 @@ Before start the firmware service make sure there isn't a instance already runni
 ps ax|grep firmwared
 ```
 
-If you find any two or more it might crash, so stop the service:
+If you find two or more it might crash, so stop the service:
 
 ```
 sudo systemctl stop firmwared.service
