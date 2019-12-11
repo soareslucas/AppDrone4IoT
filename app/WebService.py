@@ -45,7 +45,6 @@ def generate_file_data():
         file.write(textFile) 
         return file
 
-
 if( started == 'false'):
     sitesList = generate_random_data(latitude, longitude, 3, idSite)
     sensor = Sensor.Sensor(1,"umidade",3, sitesList)

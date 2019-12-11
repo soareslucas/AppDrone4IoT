@@ -86,11 +86,15 @@ sphinx /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::with_front_cam=f
 
 ```
 
+So, you need to wait for the simulator load the drone, it will look like this:
+
+![](simulator.png)
+
+
 If you wanna see it with a scenario:
 
 ```
-sphinx /opt/parrot-sphinx/usr/share/sphinx/worlds/outdoor_5.world 
- /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::with_front_cam=false::stolen_interface=wlp4s0:wlp4s0:192.168.42.1/24
+sphinx /opt/parrot-sphinx/usr/share/sphinx/worlds/outdoor_5.world  /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::with_front_cam=false::stolen_interface=wlp4s0:wlp4s0:192.168.42.1/24
 
 ```
 

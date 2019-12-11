@@ -1,5 +1,9 @@
-//Autonomia em J |||  (59940 - 1500 mAh - 11.1V )   (99900 - 2500 mAh - 11.1V ) (159840 - 4000 mAh - 11.1V )
-int Autonomia = 99900
+//Autonomia em J |||  (59940 - 1500 mAh - 11.1V )   (99900 - 38.19Wh 3350 mAh - 11.4V - CHAR 13.05 DIS 16.75A ) (159840 - 4000 mAh - 11.1V )
+
+// 137448 38.19Wh 3350 mAh - 11.4V
+// 107892 29.97Wh 2700mA  11.1v   DIS 21.6A
+
+int Autonomia = 107892
 
 // velocity in m/s
 float velocidade = 15
