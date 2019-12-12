@@ -11,9 +11,10 @@ import utm
 
 
 class Site():
-    def __init__(self, id, posicao):
+    def __init__(self, id, posicao, isRouted):
         self.id = id
         self.posicao = posicao
+        self.isRouted = isRouted
 
     def setId(self, id):
         self.id = id
@@ -24,9 +25,12 @@ class Site():
     def getId(self):
         return self.id
 
-    def getPosicao(self):
-        return self.posicao
-    
+    def setIsRouted(self, isRouted):
+        self.isRouted = isRouted
+
+    def isRouted(self):
+        return self.isRouted
+
     def getNewPosicao(self):
 
         print( 'Posicao dos pontos  : ' + self.id + ' ' + str(self.posicao[0]) + ' e '+ str(self.posicao[1]) + ' ' + str(self.posicao[2])  )
