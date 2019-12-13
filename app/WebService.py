@@ -34,7 +34,7 @@ def generate_random_data(lat, lon, num_rows,idSite):
     for _ in range(num_rows):
         dec_lat = random.random()/10000
         dec_lon = random.random()/10000
-        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,20)) )
+        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,20)) , "false")
         idSite += 1
         sitesTemp.append(site)
     return sitesTemp
@@ -138,6 +138,7 @@ def plan_flight():
     
     retorno = ('O uso da autonomia para visitar todos os sensores está em  ' 
     + str(percentual) + '% <br>'
+    + 'o gasto mínimo de energia é: ' + str(minimoEnergia) + '% <br>'
      + 'Estatísticas para realização do voo: <br>' 
       + otim.getMaximoDeSensores(listaSites, autonomy) )
         

@@ -1,7 +1,18 @@
+'''
+Created on May 24, 2019
+
+@author: lucassoares
+'''
+import math
+from pulp import *
+import numpy as np
+import app.Site as Site
+import utm
+import random
 
 
 
-def calculateEnergyCost(p1,p2):
+def calculate_energy_cost(p1,p2):
         # velocity in m/s
         velocidade = 15
         # kg/m^-3
@@ -50,7 +61,7 @@ def calculateEnergyCost(p1,p2):
         energy = (d / velocidade) * (Pv + Ph)
         return(energy)
 
-def getMinimoEnergia(listaSites):
+def get_energy_cost(listaSites):
     
         sites = ['0']
         for site in listaSites:
@@ -89,21 +100,153 @@ def getMinimoEnergia(listaSites):
         prob.solve()
         return(value(prob.objective))
 
-
-
-
-def unassignedCustomerExists(sites):
+def unassigned_customer_exists(sites):
     for s in sites:
-        if (!s.IsRouted()):
-            return true
-    return false
+        if (s.IsRouted()):
+            return "true"
+    return "false"
 
 
+def get_flight_plan_tabu_search(listaSites, vehicles, BestSolutionVehicles, noOfVehicles, cost, TABU_Horizon, iterations, min_cost_energy):
 
-private boolean unassignedCustomerExists(Node[] Nodes) {
-    for (int i = 1; i < Nodes.length; i++) {
-        if (!Nodes[i].IsRouted)
-            return true;
-    }
-    return false;
-}
+    //We use 1-0 exchange move
+    routes_from = []
+    routes_to = []
+
+    moving_node_demand = 0
+
+    veh_index_from = 0 
+    veh_index_to = 0
+
+    best_n_cost = 0
+    neighbor_cost = 0 
+
+    swap_index_a = -1
+    swap_index_b = -1
+    swap_route_from = -1
+    swap_route_to = -1
+    iteration_number = 0
+
+
+    #make some positions (so we can plot this)
+    positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
+    
+    utm_conversion = utm.from_latlon(48.879049,2.367448)
+    positions['0']=(utm_conversion[0], utm_conversion[1], 0)
+
+    #straight line distance for simplicity
+    d = lambda p1,p2: np.sqrt( (p1[0]-p2[0])**2+ (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2)
+
+    distances=dict( ((s1,s2), d(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
+
+
+    DimensionCustomer = listaSites.length
+    TABU_Matrix = []
+
+    min_cost_energy
+
+
+    while (true):
+
+        for veh in vehicles:
+            
+            routes_from = veh.routes
+
+
+            ##Not possible to move depot!
+            for i in range(len(routes_from)):         
+                for VehIndexTo in range(len(vehicles)):         
+                    routesTo = vehicles[VehIndexTo].routes
+
+                    for j in range(len(routesTo)):         
+                        ##Not possible to move after last Depot!
+                        
+                        MovingNodeDemand = routes_from.
+
+                        if ((VehIndexFrom == VehIndexTo) || this.vehicles[VehIndexTo].CheckIfFits(MovingNodeDemand)):
+                            //If we assign to a different route check capacity constrains
+                            //if in the new route is the same no need to check for capacity
+
+                            if (!((VehIndexFrom == VehIndexTo) && ((j == i) || (j == i - 1)))):  // Not a move that Changes solution cost
+                                double MinusCost1 = this.distances[routesFrom.get(i - 1).NodeId][routesFrom.get(i).NodeId]
+                                double MinusCost2 = this.distances[routesFrom.get(i).NodeId][routesFrom.get(i + 1).NodeId]
+                                double MinusCost3 = this.distances[routesTo.get(j).NodeId][routesTo.get(j + 1).NodeId]
+
+                                double AddedCost1 = this.distances[routesFrom.get(i - 1).NodeId][routesFrom.get(i + 1).NodeId]
+                                double AddedCost2 = this.distances[routesTo.get(j).NodeId][routesFrom.get(i).NodeId]
+                                double AddedCost3 = this.distances[routesFrom.get(i).NodeId][routesTo.get(j + 1).NodeId]
+
+                                //Check if the move is a Tabu! - If it is Tabu break
+                                if ((TABU_Matrix[routesFrom.get(i - 1).NodeId][routesFrom.get(i + 1).NodeId] != 0)
+                                        || (TABU_Matrix[routesTo.get(j).NodeId][routesFrom.get(i).NodeId] != 0)
+                                        || (TABU_Matrix[routesFrom.get(i).NodeId][routesTo.get(j + 1).NodeId] != 0)):
+                                    break
+
+                                NeighborCost = AddedCost1 + AddedCost2 + AddedCost3 - MinusCost1 - MinusCost2 - MinusCost3
+
+                                if (NeighborCost < BestNCost):
+                                    BestNCost = NeighborCost
+                                    SwapIndexA = i
+                                    SwapIndexB = j
+                                    SwapRouteFrom = VehIndexFrom
+                                    SwapRouteTo = VehIndexTo
+
+       #     for (int o = 0; o < TABU_Matrix[0].length; o++) {
+        #        for (int p = 0; p < TABU_Matrix[0].length; p++) {
+       #             if (TABU_Matrix[o][p] > 0):
+       #                 TABU_Matrix[o][p]--
+       #         }
+      #      }
+
+            routesFrom = this.vehicles[SwapRouteFrom].routes
+            routesTo = this.vehicles[SwapRouteTo].routes
+            this.vehicles[SwapRouteFrom].routes = null
+            this.vehicles[SwapRouteTo].routes = null
+
+            Node SwapNode = routesFrom.get(SwapIndexA)
+
+            int NodeIDBefore = routesFrom.get(SwapIndexA - 1).NodeId
+            int NodeIDAfter = routesFrom.get(SwapIndexA + 1).NodeId
+            int NodeID_F = routesTo.get(SwapIndexB).NodeId
+            int NodeID_G = routesTo.get(SwapIndexB + 1).NodeId
+
+            Random TabuRan = new Random()
+            int randomDelay1 = TabuRan.nextInt(5)
+            int randomDelay2 = TabuRan.nextInt(5)
+            int randomDelay3 = TabuRan.nextInt(5)
+
+            TABU_Matrix[NodeIDBefore][SwapNode.NodeId] = this.TABU_Horizon + randomDelay1
+            TABU_Matrix[SwapNode.NodeId][NodeIDAfter] = this.TABU_Horizon + randomDelay2
+            TABU_Matrix[NodeID_F][NodeID_G] = this.TABU_Horizon + randomDelay3
+
+            routesFrom.remove(SwapIndexA)
+
+            if (SwapRouteFrom == SwapRouteTo):
+                if (SwapIndexA < SwapIndexB):
+                    routesTo.add(SwapIndexB, SwapNode)
+                else:
+                    routesTo.add(SwapIndexB + 1, SwapNode)
+                
+            else:
+                routesTo.add(SwapIndexB + 1, SwapNode)
+            
+
+            vehicles[SwapRouteFrom].routes = routesFrom
+            vehicles[SwapRouteFrom].load -= MovingNodeDemand
+
+            vehicles[SwapRouteTo].routes = routesTo
+            vehicles[SwapRouteTo].load += MovingNodeDemand
+
+            cost += BestNCost
+
+            if (cost < BestSolutionCost):
+                iteration_number = 0
+                SaveBestSolution()
+            else:
+                iteration_number += 1
+
+            if (iterations == iteration_number):
+                break
+
+        ##this.vehicles = this.BestSolutionVehicles
+        ##this.cost = this.BestSolutionCost

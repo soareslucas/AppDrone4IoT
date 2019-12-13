@@ -18,13 +18,16 @@ class Site():
 
     def setId(self, id):
         self.id = id
+
+    def getId(self):
+        return self.id
         
     def setPosicao(self, posicao):
         self.posicao = posicao
-     
-    def getId(self):
-        return self.id
 
+    def getPosicao(self):
+        return self.posicao
+    
     def setIsRouted(self, isRouted):
         self.isRouted = isRouted
 

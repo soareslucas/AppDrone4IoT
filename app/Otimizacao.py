@@ -146,19 +146,19 @@ def getMinimoEnergia(listaSites):
         utm_conversion = utm.from_latlon(48.879049,2.367448)
         positions['0']=(utm_conversion[0], utm_conversion[1], 0)
 
-        distances=dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
+        energy_costs =dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
 
         for i in sites:
             for j in sites:
                 if i!=j:
-                    print('Custo energético entre '+ i+' e '+ j+' :'+ str(distances[(i,j)]))
+                    print('Custo energético entre '+ i+' e '+ j+' :'+ str(energy_costs[(i,j)]))
         K = 1 
         prob=LpProblem("vehicle",LpMinimize)
 
-        x = LpVariable.dicts('x',distances, 0,1,LpBinary)
+        x = LpVariable.dicts('x',energy_costs, 0,1,LpBinary)
         u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
 
-        cost = (lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ]))
+        cost = (lpSum([  x[(i,j)]  * energy_costs[(i,j)]for (i,j) in energy_costs ]))
         prob+=cost
 
         for k in sites:
