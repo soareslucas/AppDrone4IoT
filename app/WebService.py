@@ -9,6 +9,9 @@ import numpy as np
 import app.Otimizacao as otim
 import app.Sensor as Sensor
 import app.Site as Site
+import app.TabuSearch as tabu
+
+
 #import app.DroneMQTT as ServiceSchedule
 from threading import Thread
 import os
@@ -134,15 +137,20 @@ def plan_flight():
 
     print('Lista de Sites: ' +str(listaSites))
     minimoEnergia = otim.getMinimoEnergia(listaSites)
-    percentual = (float(minimoEnergia)/autonomy) * 100
+    #percentual = (float(minimoEnergia)/autonomy) * 100
+
+    print('o gasto mínimo de energia é: ' + str(minimoEnergia) + '% <br>')
     
-    retorno = ('O uso da autonomia para visitar todos os sensores está em  ' 
-    + str(percentual) + '% <br>'
-    + 'o gasto mínimo de energia é: ' + str(minimoEnergia) + '% <br>'
-     + 'Estatísticas para realização do voo: <br>' 
-      + otim.getMaximoDeSensores(listaSites, autonomy) )
+    tabu.get_flight_plan_tabu_search(listaSites, minimoEnergia)
+
+
+    """    retorno = ('O uso da autonomia para visitar todos os sensores está em  ' 
+        + str(percentual) + '% <br>'
+        + 'o gasto mínimo de energia é: ' + str(minimoEnergia) + '% <br>'
+        + 'Estatísticas para realização do voo: <br>' 
+        + otim.getMaximoDeSensores(listaSites, autonomy) ) """
         
-    return (retorno)    
+    return ('retorno')    
     
 @app.route("/solicitaDadosSensor", methods=['GET'])
 def subscribe_for_sensors_data():

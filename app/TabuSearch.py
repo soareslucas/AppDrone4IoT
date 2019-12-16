@@ -7,10 +7,17 @@ import math
 from pulp import *
 import numpy as np
 import app.Site as Site
+import app.Vehicle as Vehicle
 import utm
 import random
 
+vehicles = [Vehicle.Vehicle(59940)]
 
+BestSolutionVehicles = []
+cost = 0
+BestSolutionCost = 0
+iterations = 5
+TABU_Horizon = 10
 
 def calculate_energy_cost(p1,p2):
         # velocity in m/s
@@ -72,7 +79,7 @@ def get_energy_cost(listaSites):
         utm_conversion = utm.from_latlon(48.879049,2.367448)
         positions['0']=(utm_conversion[0], utm_conversion[1], 0)
 
-        distances=dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
+        distances=dict( ((s1,s2), calculate_energy_cost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
 
         for i in sites:
             for j in sites:
@@ -107,135 +114,153 @@ def unassigned_customer_exists(sites):
     return "false"
 
 
-def get_flight_plan_tabu_search(listaSites, vehicles, BestSolutionVehicles, noOfVehicles, cost, TABU_Horizon, iterations, min_cost_energy):
+def get_flight_plan_tabu_search(listaSites, min_cost_energy):
+    global cost
+    global vehicles
+    global BestSolutionVehicles
+    global BestSolutionCost
+    global TABU_Horizon
+    global iterations
 
-    //We use 1-0 exchange move
-    routes_from = []
-    routes_to = []
+    cost = min_cost_energy
 
-    moving_node_demand = 0
+    ##We use 1-0 exchange move
+    routesFrom = []
+    routesTo = []
 
-    veh_index_from = 0 
-    veh_index_to = 0
+   # MovingNodeDemand = 0
 
-    best_n_cost = 0
-    neighbor_cost = 0 
+    VehIndexFrom = 0 
+    VehIndexTo = 0
 
-    swap_index_a = -1
-    swap_index_b = -1
-    swap_route_from = -1
-    swap_route_to = -1
+    BestNCost = 0
+    NeighborCost = 0 
+
+    SwapIndexA = -1
+    SwapIndexB = -1
+    SwapRouteFrom = -1
+    SwapRouteTo = -1
     iteration_number = 0
 
 
-    #make some positions (so we can plot this)
     positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
-    
     utm_conversion = utm.from_latlon(48.879049,2.367448)
     positions['0']=(utm_conversion[0], utm_conversion[1], 0)
 
     #straight line distance for simplicity
-    d = lambda p1,p2: np.sqrt( (p1[0]-p2[0])**2+ (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2)
-
-    distances=dict( ((s1,s2), d(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
+    distances=dict( ((s1,s2), calculate_energy_cost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
 
 
-    DimensionCustomer = listaSites.length
+    DimensionCustomer = len(listaSites)
     TABU_Matrix = []
 
-    min_cost_energy
+    BestSolutionCost = cost
 
+    while (True):
+        print ("Done 1")    
 
-    while (true):
 
         for veh in vehicles:
+
             
-            routes_from = veh.routes
+            routesFrom = veh.routes
+
+            print ("Done 2")    
 
 
             ##Not possible to move depot!
-            for i in range(len(routes_from)):         
-                for VehIndexTo in range(len(vehicles)):         
+            for i in range(len(routesFrom)):         
+
+                print ("Done 3")    
+
+                for VehIndexTo in range(len(vehicles)):
                     routesTo = vehicles[VehIndexTo].routes
+                    print ("Done 4")
 
                     for j in range(len(routesTo)):         
+
+                        print ("Done 5")
                         ##Not possible to move after last Depot!
                         
-                        MovingNodeDemand = routes_from.
+                        # MovingNodeDemand = routesFrom[i].demand
 
-                        if ((VehIndexFrom == VehIndexTo) || this.vehicles[VehIndexTo].CheckIfFits(MovingNodeDemand)):
-                            //If we assign to a different route check capacity constrains
-                            //if in the new route is the same no need to check for capacity
+                        #if ( (VehIndexFrom == VehIndexTo) or vehicles(VehIndexTo).CheckIfFits(MovingNodeDemand) ):
+                            ##If we assign to a different route check capacity constrains
+                            ##if in the new route is the same no need to check for capacity
 
-                            if (!((VehIndexFrom == VehIndexTo) && ((j == i) || (j == i - 1)))):  // Not a move that Changes solution cost
-                                double MinusCost1 = this.distances[routesFrom.get(i - 1).NodeId][routesFrom.get(i).NodeId]
-                                double MinusCost2 = this.distances[routesFrom.get(i).NodeId][routesFrom.get(i + 1).NodeId]
-                                double MinusCost3 = this.distances[routesTo.get(j).NodeId][routesTo.get(j + 1).NodeId]
+                        if ( not((VehIndexFrom == VehIndexTo) and ((j == i) or (j == i - 1)))): 
+                                ## Not a move that Changes solution cost
+                            MinusCost1 = distances[routesFrom(i - 1).NodeId][routesFrom(i).NodeId]
+                            MinusCost2 = distances[routesFrom(i).NodeId][routesFrom(i + 1).NodeId]
+                            MinusCost3 = distances[routesTo(j).NodeId][routesTo(j + 1).NodeId]
 
-                                double AddedCost1 = this.distances[routesFrom.get(i - 1).NodeId][routesFrom.get(i + 1).NodeId]
-                                double AddedCost2 = this.distances[routesTo.get(j).NodeId][routesFrom.get(i).NodeId]
-                                double AddedCost3 = this.distances[routesFrom.get(i).NodeId][routesTo.get(j + 1).NodeId]
+                            AddedCost1 = distances[routesFrom(i - 1).NodeId][routesFrom(i + 1).NodeId]
+                            AddedCost2 = distances[routesTo(j).NodeId][routesFrom(i).NodeId]
+                            AddedCost3 = distances[routesFrom(i).NodeId][routesTo(j + 1).NodeId]
 
-                                //Check if the move is a Tabu! - If it is Tabu break
-                                if ((TABU_Matrix[routesFrom.get(i - 1).NodeId][routesFrom.get(i + 1).NodeId] != 0)
-                                        || (TABU_Matrix[routesTo.get(j).NodeId][routesFrom.get(i).NodeId] != 0)
-                                        || (TABU_Matrix[routesFrom.get(i).NodeId][routesTo.get(j + 1).NodeId] != 0)):
-                                    break
+                            ##Check if the move is a Tabu! - If it is Tabu break
+                            if ((TABU_Matrix[routesFrom(i - 1).NodeId][routesFrom(i + 1).NodeId] != 0)
+                                    or (TABU_Matrix[routesTo(j).NodeId][routesFrom(i).NodeId] != 0)
+                                    or (TABU_Matrix[routesFrom(i).NodeId][routesTo(j + 1).NodeId] != 0)):
+                                break
 
-                                NeighborCost = AddedCost1 + AddedCost2 + AddedCost3 - MinusCost1 - MinusCost2 - MinusCost3
+                            NeighborCost = AddedCost1 + AddedCost2 + AddedCost3 - MinusCost1 - MinusCost2 - MinusCost3
 
-                                if (NeighborCost < BestNCost):
-                                    BestNCost = NeighborCost
-                                    SwapIndexA = i
-                                    SwapIndexB = j
-                                    SwapRouteFrom = VehIndexFrom
-                                    SwapRouteTo = VehIndexTo
+                            if (NeighborCost < BestNCost):
+                                BestNCost = NeighborCost
+                                SwapIndexA = i
+                                SwapIndexB = j
+                                SwapRouteFrom = VehIndexFrom
+                                SwapRouteTo = VehIndexTo
 
-       #     for (int o = 0; o < TABU_Matrix[0].length; o++) {
-        #        for (int p = 0; p < TABU_Matrix[0].length; p++) {
-       #             if (TABU_Matrix[o][p] > 0):
-       #                 TABU_Matrix[o][p]--
-       #         }
-      #      }
 
-            routesFrom = this.vehicles[SwapRouteFrom].routes
-            routesTo = this.vehicles[SwapRouteTo].routes
-            this.vehicles[SwapRouteFrom].routes = null
-            this.vehicles[SwapRouteTo].routes = null
+            if ( not len(TABU_Matrix) == 0):
+                for o in range(len(TABU_Matrix(0))):
+                    for p in range(len(TABU_Matrix(0))):
+                        if (TABU_Matrix[o][p] > 0):
+                            TABU_Matrix[o][p] -= 1
+                    
 
-            Node SwapNode = routesFrom.get(SwapIndexA)
+            routesFrom = vehicles[SwapRouteFrom].routes
+            routesTo = vehicles[SwapRouteTo].routes
+            vehicles[SwapRouteFrom].routes = None
+            vehicles[SwapRouteTo].routes = None
 
-            int NodeIDBefore = routesFrom.get(SwapIndexA - 1).NodeId
-            int NodeIDAfter = routesFrom.get(SwapIndexA + 1).NodeId
-            int NodeID_F = routesTo.get(SwapIndexB).NodeId
-            int NodeID_G = routesTo.get(SwapIndexB + 1).NodeId
+            if ( not len(routesFrom) == 0):
+                SwapNode = routesFrom[SwapIndexA]
+                NodeIDBefore = routesFrom(SwapIndexA - 1).getId()
+                NodeIDAfter = routesFrom(SwapIndexA + 1).getId()
 
-            Random TabuRan = new Random()
-            int randomDelay1 = TabuRan.nextInt(5)
-            int randomDelay2 = TabuRan.nextInt(5)
-            int randomDelay3 = TabuRan.nextInt(5)
+            if ( not len(routesTo) == 0):
+                NodeID_F = routesTo(SwapIndexB).getId()
+                NodeID_G = routesTo(SwapIndexB + 1).getId()
 
-            TABU_Matrix[NodeIDBefore][SwapNode.NodeId] = this.TABU_Horizon + randomDelay1
-            TABU_Matrix[SwapNode.NodeId][NodeIDAfter] = this.TABU_Horizon + randomDelay2
-            TABU_Matrix[NodeID_F][NodeID_G] = this.TABU_Horizon + randomDelay3
+            
+            randomDelay1 = random.randrange(5)
+            randomDelay2 = random.randrange(5)
+            randomDelay3 = random.randrange(5)
+
+            TABU_Matrix[NodeIDBefore][SwapNode.NodeId] = TABU_Horizon + randomDelay1
+            TABU_Matrix[SwapNode.getId()][NodeIDAfter] = TABU_Horizon + randomDelay2
+            TABU_Matrix[NodeID_F][NodeID_G] = TABU_Horizon + randomDelay3
 
             routesFrom.remove(SwapIndexA)
 
             if (SwapRouteFrom == SwapRouteTo):
                 if (SwapIndexA < SwapIndexB):
-                    routesTo.add(SwapIndexB, SwapNode)
+                    routesTo.insert(SwapIndexB, SwapNode)
                 else:
-                    routesTo.add(SwapIndexB + 1, SwapNode)
+                    routesTo.insert(SwapIndexB + 1, SwapNode)
                 
             else:
-                routesTo.add(SwapIndexB + 1, SwapNode)
+                routesTo.insert(SwapIndexB + 1, SwapNode)
             
 
             vehicles[SwapRouteFrom].routes = routesFrom
-            vehicles[SwapRouteFrom].load -= MovingNodeDemand
+            #vehicles[SwapRouteFrom].load -= MovingNodeDemand
 
             vehicles[SwapRouteTo].routes = routesTo
-            vehicles[SwapRouteTo].load += MovingNodeDemand
+           # vehicles[SwapRouteTo].load += MovingNodeDemand
 
             cost += BestNCost
 
@@ -248,5 +273,45 @@ def get_flight_plan_tabu_search(listaSites, vehicles, BestSolutionVehicles, noOf
             if (iterations == iteration_number):
                 break
 
-        ##this.vehicles = this.BestSolutionVehicles
-        ##this.cost = this.BestSolutionCost
+        vehicles = BestSolutionVehicles
+        cost = BestSolutionCost
+
+
+def SaveBestSolution():
+    global cost
+    global vehicles
+    global BestSolutionVehicles
+    global BestSolutionCost
+
+    BestSolutionCost = cost
+
+    for j in range(len(vehicles)):
+
+        BestSolutionVehicles[j].routes = []
+
+        if ( not vehicles[j].routes.isEmpty()):
+            for k in range(len(vehicles[j].routes)):
+                n = vehicles[j].routes(k)
+                BestSolutionVehicles[j].routes.append(n)
+
+
+def printsolution():
+
+    global cost
+    global vehicles
+    global BestSolutionVehicles
+    global BestSolutionCost
+
+    for j in range(len(vehicles)):
+        if (not vehicles[j].routes.isEmpty()):
+            print("Vehicle " + j + ":")
+            RoutSize = len(vehicles[j].routes)
+            for k in range(len(vehicles[j].routes)):
+
+                if (k == RoutSize - 1):
+                    print(vehicles[j].routes(k).getId())
+                else:
+                    print(vehicles[j].routes(k).getId() + "->")
+
+    print("\nBest Value: " + cost + "\n");
+ 

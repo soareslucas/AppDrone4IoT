@@ -15,6 +15,7 @@ class Site():
         self.id = id
         self.posicao = posicao
         self.isRouted = isRouted
+     #   self.demand = demand
 
     def setId(self, id):
         self.id = id
@@ -33,6 +34,14 @@ class Site():
 
     def isRouted(self):
         return self.isRouted
+
+
+    #def setDemand(self, demand):
+    #    self.demand = demand
+
+   # def getDemand(self):
+   #     return self.demand
+
 
     def getNewPosicao(self):
 

@@ -198,12 +198,10 @@ def getMaximoDeSensores(listaSites, autonomia):
         #create the problme
         prob=LpProblem("vehicle",LpMaximize)
 
-
         #indicator variable if site i is connected to site j in the tour
         x = LpVariable.dicts('x',distances, 0,1,LpBinary)
         #dummy vars to eliminate subtours
         u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
-
 
         #the objective
         cost = (lpSum([x[(i,j)] for (i,j) in x]))
