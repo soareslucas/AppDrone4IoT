@@ -10,10 +10,11 @@ import app.Site as Site
 import app.Vehicle as Vehicle
 import utm
 import random
+import sys
+
 
 vehicles = [Vehicle.Vehicle(59940)]
-
-BestSolutionVehicles = []
+BestSolutionVehicles = [Vehicle.Vehicle(59940)]
 cost = 0
 BestSolutionCost = 0
 iterations = 5
@@ -124,16 +125,18 @@ def get_flight_plan_tabu_search(listaSites, min_cost_energy):
 
     cost = min_cost_energy
 
-    ##We use 1-0 exchange move
+    #We use 1-0 exchange move
     routesFrom = []
     routesTo = []
 
-   # MovingNodeDemand = 0
-
+    #MovingNodeDemand = 0
     VehIndexFrom = 0 
     VehIndexTo = 0
 
-    BestNCost = 0
+    BestNCost = sys.float_info.max
+
+    print(BestNCost)
+
     NeighborCost = 0 
 
     SwapIndexA = -1
@@ -142,7 +145,6 @@ def get_flight_plan_tabu_search(listaSites, min_cost_energy):
     SwapRouteTo = -1
     iteration_number = 0
 
-
     positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
     utm_conversion = utm.from_latlon(48.879049,2.367448)
     positions['0']=(utm_conversion[0], utm_conversion[1], 0)
@@ -150,11 +152,15 @@ def get_flight_plan_tabu_search(listaSites, min_cost_energy):
     #straight line distance for simplicity
     distances=dict( ((s1,s2), calculate_energy_cost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
 
-
     DimensionCustomer = len(listaSites)
     TABU_Matrix = []
 
     BestSolutionCost = cost
+
+    site = Site.Site(str(0), (48.879049, 2.367448, 0) , False)
+    
+    vehicles[0].add_node(site, 0)
+
 
     while (True):
         print ("Done 1")    
@@ -188,25 +194,28 @@ def get_flight_plan_tabu_search(listaSites, min_cost_energy):
                             ##If we assign to a different route check capacity constrains
                             ##if in the new route is the same no need to check for capacity
 
-                        if ( not((VehIndexFrom == VehIndexTo) and ((j == i) or (j == i - 1)))): 
-                                ## Not a move that Changes solution cost
-                            MinusCost1 = distances[routesFrom(i - 1).NodeId][routesFrom(i).NodeId]
-                            MinusCost2 = distances[routesFrom(i).NodeId][routesFrom(i + 1).NodeId]
-                            MinusCost3 = distances[routesTo(j).NodeId][routesTo(j + 1).NodeId]
+                        if ( not (((j == i) or (j == i - 1)))): 
+                            print ("Done 6")
+                            # Not a move that Changes solution cost
+                            MinusCost1 = distances[routesFrom(i - 1).getId()][routesFrom(i).getId()]
+                            MinusCost2 = distances[routesFrom(i).getId()][routesFrom(i + 1).getId()]
+                            MinusCost3 = distances[routesTo(j).getId()][routesTo(j + 1).getId()]
 
-                            AddedCost1 = distances[routesFrom(i - 1).NodeId][routesFrom(i + 1).NodeId]
-                            AddedCost2 = distances[routesTo(j).NodeId][routesFrom(i).NodeId]
-                            AddedCost3 = distances[routesFrom(i).NodeId][routesTo(j + 1).NodeId]
+                            AddedCost1 = distances[routesFrom(i - 1).getId()][routesFrom(i + 1).getId()]
+                            AddedCost2 = distances[routesTo(j).getId()][routesFrom(i).getId()]
+                            AddedCost3 = distances[routesFrom(i).getId()][routesTo(j + 1).getId()]
 
                             ##Check if the move is a Tabu! - If it is Tabu break
-                            if ((TABU_Matrix[routesFrom(i - 1).NodeId][routesFrom(i + 1).NodeId] != 0)
-                                    or (TABU_Matrix[routesTo(j).NodeId][routesFrom(i).NodeId] != 0)
-                                    or (TABU_Matrix[routesFrom(i).NodeId][routesTo(j + 1).NodeId] != 0)):
+                            if ((TABU_Matrix[routesFrom(i - 1).getId()][routesFrom(i + 1).getId()] != 0)
+                                    or (TABU_Matrix[routesTo(j).getId()][routesFrom(i).getId()] != 0)
+                                    or (TABU_Matrix[routesFrom(i).getId()][routesTo(j + 1).getId()] != 0)):
                                 break
 
                             NeighborCost = AddedCost1 + AddedCost2 + AddedCost3 - MinusCost1 - MinusCost2 - MinusCost3
 
                             if (NeighborCost < BestNCost):
+
+                                print ("Done 7")
                                 BestNCost = NeighborCost
                                 SwapIndexA = i
                                 SwapIndexB = j
@@ -226,12 +235,14 @@ def get_flight_plan_tabu_search(listaSites, min_cost_energy):
             vehicles[SwapRouteFrom].routes = None
             vehicles[SwapRouteTo].routes = None
 
-            if ( not len(routesFrom) == 0):
+            if ( len(routesFrom) > 1):
                 SwapNode = routesFrom[SwapIndexA]
                 NodeIDBefore = routesFrom(SwapIndexA - 1).getId()
                 NodeIDAfter = routesFrom(SwapIndexA + 1).getId()
+            else:
+                NodeIDBefore
 
-            if ( not len(routesTo) == 0):
+            if ( len(routesTo) > 1):
                 NodeID_F = routesTo(SwapIndexB).getId()
                 NodeID_G = routesTo(SwapIndexB + 1).getId()
 
@@ -240,7 +251,7 @@ def get_flight_plan_tabu_search(listaSites, min_cost_energy):
             randomDelay2 = random.randrange(5)
             randomDelay3 = random.randrange(5)
 
-            TABU_Matrix[NodeIDBefore][SwapNode.NodeId] = TABU_Horizon + randomDelay1
+            TABU_Matrix[NodeIDBefore][SwapNode.getId()] = TABU_Horizon + randomDelay1
             TABU_Matrix[SwapNode.getId()][NodeIDAfter] = TABU_Horizon + randomDelay2
             TABU_Matrix[NodeID_F][NodeID_G] = TABU_Horizon + randomDelay3
 

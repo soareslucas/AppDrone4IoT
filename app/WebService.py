@@ -6,10 +6,10 @@ Created on Jun 1, 2019
 from flask import Flask
 from flask import request
 import numpy as np
-import app.Otimizacao as otim
-import app.Sensor as Sensor
-import app.Site as Site
-import app.TabuSearch as tabu
+import Otimizacao as otim
+import Sensor as Sensor
+import Site as Site
+import tabu_search as tabu
 
 
 #import app.DroneMQTT as ServiceSchedule
@@ -30,6 +30,9 @@ textFile = ''
 # Autonomia em J |||  (59940 - 1500 mAh - 11.1V )   (99900 - 2500 mAh - 11.1V ) (159840 - 4000 mAh - 11.1V )
 autonomy = 59940
 
+site = Site.Site(str(0), (48.879049, 2.367448, 0) , "false")
+listaSites = [site]
+
 idSite = 1
 
 def generate_random_data(lat, lon, num_rows,idSite):
@@ -48,9 +51,9 @@ def generate_file_data():
         file.write(textFile) 
         return file
 
-if( started == 'false'):
-    sitesList = generate_random_data(latitude, longitude, 3, idSite)
-    sensor = Sensor.Sensor(1,"umidade",3, sitesList)
+if(started == 'false'):
+    sitesList = generate_random_data(latitude, longitude, 2, idSite)
+    sensor = Sensor.Sensor(1,"umidade",2, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     print(idSite)
@@ -128,20 +131,34 @@ def create_app():
 @app.route("/planejaVoo", methods=['GET'])
 def plan_flight():
 
-    listaSites = []
+    global listaSites
+
     for x in listaSensores:
         if x.getSolicitado() == True:
             sites = x.getSites()
             for y in sites:
                 listaSites.append(y)
 
-    print('Lista de Sites: ' +str(listaSites))
-    minimoEnergia = otim.getMinimoEnergia(listaSites)
+    print('Sites List: ' +str(listaSites))
+    min_energy = otim.getMinimoEnergia(listaSites)
     #percentual = (float(minimoEnergia)/autonomy) * 100
 
-    print('o gasto mínimo de energia é: ' + str(minimoEnergia) + '% <br>')
+    print('o gasto mínimo de energia é: ' + str(min_energy) + '% <br>')
     
-    tabu.get_flight_plan_tabu_search(listaSites, minimoEnergia)
+    dict_of_neighbours = tabu.generate_neighbours(listaSites)
+
+
+    """     positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
+        energy_costs = dict( ((s1,s2), tabu.calculate_energy_cost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
+    """
+    first = tabu.generate_first_solution(dict_of_neighbours)
+    print(first)
+
+    result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSites)*10)
+
+
+    print(result.best_solution_ever)
+    print(result.best_cost)
 
 
     """    retorno = ('O uso da autonomia para visitar todos os sensores está em  ' 

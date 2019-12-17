@@ -9,7 +9,7 @@ import numpy as np
 #import seaborn as sn
 import random
 #from mpl_toolkits import mplot3d
-import app.Site as Site
+import Site as Site
 
 import utm
 
@@ -137,16 +137,16 @@ def calculateEnergyCost(p1,p2):
 
 def getMinimoEnergia(listaSites):
     
-        sites = ['0']
+        sites = []
         for site in listaSites:
             sites.append(site.getId())
 
         positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
 
-        utm_conversion = utm.from_latlon(48.879049,2.367448)
-        positions['0']=(utm_conversion[0], utm_conversion[1], 0)
+        # utm_conversion = utm.from_latlon(48.879049,2.367448)
+        # positions['0']=(utm_conversion[0], utm_conversion[1], 0)
 
-        energy_costs =dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
+        energy_costs = dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
 
         for i in sites:
             for j in sites:

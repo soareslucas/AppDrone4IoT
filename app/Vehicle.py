@@ -5,9 +5,9 @@ Created on Dec 13, 2019
 '''
 
 class Vehicle():
-    def __init__(self, autonomy):
+    def __init__(self, capacity):
         self.routes = []
-        self.autonomy = autonomy
+        self.capacity = capacity
         self.total_energy_spent = 0
         self.current_location = 0
 
@@ -17,4 +17,4 @@ class Vehicle():
         self.current_location = site.id
 
     def check_if_fits(self, energy_cost):
-        return total_energy_spent + energy_cost <= autonomy
+        return total_energy_spent + energy_cost <= capacity
