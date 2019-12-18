@@ -83,16 +83,21 @@ def generate_first_solution( dict_of_neighbours):
     first_solution = []
     distance = 0
     visiting = start_node
-    pre_node = 0
-    while visiting not in first_solution:
-        _tmp = dict_of_neighbours
-        _tmp.pop(pre_node, None)
+    pre_node = None
+
+
+    _tmp = copy.deepcopy(dict_of_neighbours[visiting])
+
+    while not len(_tmp) == 0:
         next_node = min(_tmp.items(), key=lambda x: x[1])[0]
         distance += dict_of_neighbours[visiting][next_node]
         first_solution.append(visiting)
         pre_node = visiting
         visiting = next_node
+        _tmp.pop(next_node, None)
 
+    first_solution.append(visiting)
+    pre_node = visiting
     first_solution.append(0)
     distance += dict_of_neighbours[pre_node][end_node]
     return first_solution, distance

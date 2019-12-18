@@ -6,10 +6,10 @@ Created on Jun 1, 2019
 from flask import Flask
 from flask import request
 import numpy as np
-import Otimizacao as otim
-import Sensor as Sensor
-import Site as Site
-import tabu_search as tabu
+import app.Otimizacao as otim
+import app.Sensor as Sensor
+import app.Site as Site
+import app.tabu_search as tabu
 
 
 #import app.DroneMQTT as ServiceSchedule
@@ -157,8 +157,8 @@ def plan_flight():
     result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSites)*10)
 
 
-    print(result.best_solution_ever)
-    print(result.best_cost)
+    print(result[0])
+    print(result[1])
 
 
     """    retorno = ('O uso da autonomia para visitar todos os sensores está em  ' 
@@ -190,7 +190,7 @@ def subscribe_for_sensors_data():
                 x.setSolicitado(True)
                 listaSensores.append(x)
     
-    return (plan_flight())          
+        return (plan_flight())          
 
 def run_drone_mqtt(arg, arg2):
     print ("Running thread! Args:", (arg, arg2))
