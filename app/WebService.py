@@ -4,7 +4,12 @@ Created on Jun 1, 2019
 @author: lucassoares
 '''
 from flask import Flask
+import json
+from flask import jsonify
+from flask import Response
 from flask import request
+from flask_cors import CORS, cross_origin
+
 import numpy as np
 import app.Otimizacao as otim
 import app.Sensor as Sensor
@@ -21,6 +26,9 @@ import math
 from flask import Response
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 started = 'false'
 latitude = 48.8790
 longitude = 2.3674
@@ -95,6 +103,14 @@ def web_service():
         retorno += str(s.getId())+ "&nbsp;!!&nbsp;" + s.getNome()+ "&nbsp;!!&nbsp;" + str(s.getQuantidade()) + "&nbsp;!!&nbsp;" + str(s.getSolicitado())+  "<br> "
     return retorno
 
+
+@app.route("/get_sensors")
+def get_sensors():
+    _tmp = []
+    for l in listaSensores:
+        _tmp +=  [l.toJSON()]
+    return Response(json.dumps(_tmp),  mimetype='application/json')
+
 @app.route("/get-file")
 def get_file():
     results = generate_file_data()
@@ -104,6 +120,9 @@ def get_file():
                        mimetype="text/plain",
                        headers={"Content-Disposition":
                                     "attachment;filename=flightplan.mavlink"})
+
+
+
 
 @app.route("/autonomia", methods=['GET'])
 def set_autonomy():

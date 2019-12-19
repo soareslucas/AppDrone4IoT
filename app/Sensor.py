@@ -3,7 +3,7 @@ Created on Jun 1, 2019
 
 @author: lucassoares
 '''
-
+import json
 
 class Sensor:
     def __init__(self, id, nome, quantidade, sites):
@@ -42,3 +42,6 @@ class Sensor:
     
     def getSites(self):
         return self.sites
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
