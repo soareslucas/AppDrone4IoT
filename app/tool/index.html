@@ -125,8 +125,12 @@
             </div>
           </div>
 
+          <input type="hidden" id="test3" value="Mickey Mouse">
+
           <!--The div element for the map -->
           <div id="map"></div>
+
+          
 
           <h2>Sensors List</h2>
           <div class="table-responsive">
@@ -139,13 +143,10 @@
                   <th>Add to Flight Plan?</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>1,001</td>
-                  <td>Lorem</td>
-                  <td>ipsum</td>
-                  <td>dolor</td>
-                </tr>
+              <tbody id="listSensors">
+
+
+
                
               </tbody>
             </table>
@@ -153,6 +154,11 @@
         </main>
       </div>
     </div>
+
+
+
+
+
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
@@ -168,16 +174,37 @@
     </script>
 
     <script>
-      // Initialize and add the map
-      function initMap() {
-        // The location of Uluru
-        var uluru = {lat: 48.879049, lng: 2.367448};
-        // The map, centered at Uluru
-        var map = new google.maps.Map(
-            document.getElementById('map'), {zoom: 4, center: uluru});
-        // The marker, positioned at Uluru
-        var marker = new google.maps.Marker({position: uluru, map: map});
-      }
+
+          $.ajax({
+              url : 'http://127.0.0.1:5000/get_sites',
+              type : 'GET',
+              dataType:'json',
+              success : function(data) {  
+
+
+                var html = $('#test3');
+
+                var json = JSON.parse(data)
+                var input = JSON.stringify(json)
+                console.log(input)
+
+                html.val(input);
+
+              }
+          });   
+
+          function initMap() {
+
+              // The location of Uluru
+              var uluru = {lat: 48.879049, lng: 2.367448};
+              // The map, centered at Uluru
+              var map = new google.maps.Map(
+                  document.getElementById('map'), {zoom: 50, center: uluru});
+          }
+
+
+
+
     </script>
           <!--Load the API from the specified URL
           * The async attribute allows the browser to render the page while the API loads
@@ -196,27 +223,36 @@
         type : 'GET',
         dataType:'json',
         success : function(data) {              
-          alert('Data: '+data);
-
-          $(function() {
-            $.each(data, function(i, item) {
-                var $tr = $('<tr>').append(
-                    $('<td>').text(i.id),
-                    $('<td>').text(i.nome),
-                    $('<td>').text(i.quantidade),
-                    $('<td>').text("False")
-
-                ); //.appendTo('#records_table');
-                console.log($tr.wrap('<p>').html());
-              });
-          });
+          var html = $('#listSensors');
+          $.each(data, function(i, item) {
+            var sensors = JSON.parse(item)
+            var $tr = $('<tr>').append(
+              $('<td>').text(sensors.id),
+              $('<td>').text(sensors.nome),
+              $('<td>').text(sensors.quantidade),
+              $('<td>').text(sensors.solicitado)
+            ); 
+            html.append($tr)
+          }); 
 
         },
+        
         error : function(request,error){
           alert("Request: "+JSON.stringify(request));
         }
+
       });
+
+
+
+      var html = $('#test3');
+      console.log(html.val())
+
     </script>
+
+
+
+
 
 
 

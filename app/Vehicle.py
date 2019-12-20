@@ -3,6 +3,7 @@ Created on Dec 13, 2019
 
 @author: lucassoares
 '''
+import json
 
 class Vehicle():
     def __init__(self, capacity):

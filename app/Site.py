@@ -7,6 +7,7 @@ import math
 import numpy as np
 
 import utm
+import json
 
 
 
@@ -56,3 +57,6 @@ class Site():
     
     def toString(self):
         return str(id)  
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)

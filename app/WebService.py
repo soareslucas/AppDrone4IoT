@@ -111,6 +111,15 @@ def get_sensors():
         _tmp +=  [l.toJSON()]
     return Response(json.dumps(_tmp),  mimetype='application/json')
 
+
+@app.route("/get_sites")
+def get_sites():
+    _tmp = []
+    for l in listaSites:
+        _tmp +=  [l.toJSON()]
+    return Response(json.dumps(_tmp),  mimetype='application/json')
+
+
 @app.route("/get-file")
 def get_file():
     results = generate_file_data()
