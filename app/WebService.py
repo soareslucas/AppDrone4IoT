@@ -29,7 +29,6 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-started = 'false'
 latitude = 48.8790
 longitude = 2.3674
 
@@ -59,39 +58,36 @@ def generate_file_data():
         file.write(textFile) 
         return file
 
-if(started == 'false'):
-    sitesList = generate_random_data(latitude, longitude, 2, idSite)
-    sensor = Sensor.Sensor(1,"umidade",2, sitesList)
-    lastSite = sitesList[len(sitesList) -1]
-    idSite = lastSite.getId()
-    print(idSite)
-    listaSensores = [sensor]
+sitesList = generate_random_data(latitude, longitude, 2, idSite)
+sensor = Sensor.Sensor(1,"umidade",2, sitesList)
+lastSite = sitesList[len(sitesList) -1]
+idSite = lastSite.getId()
+print(idSite)
+listaSensores = [sensor]
 
-    idSite = int(idSite) + 1
-    sitesList = generate_random_data(latitude, longitude, 4, int(idSite))
-    sensor = Sensor.Sensor( 2,"temperatura",4, sitesList)
-    lastSite = sitesList[len(sitesList) -1]
-    idSite = lastSite.getId()
-    print(idSite)
-    listaSensores.append(sensor)
+idSite = int(idSite) + 1
+sitesList = generate_random_data(latitude, longitude, 4, int(idSite))
+sensor = Sensor.Sensor( 2,"temperatura",4, sitesList)
+lastSite = sitesList[len(sitesList) -1]
+idSite = lastSite.getId()
+print(idSite)
+listaSensores.append(sensor)
 
-    idSite = int(idSite) + 1
-    sitesList = generate_random_data(latitude, longitude, 2, int(idSite))
-    sensor = Sensor.Sensor( 3,"phSolo",2,sitesList)
-    lastSite = sitesList[len(sitesList) -1]
-    idSite = lastSite.getId()
-    print(idSite)
-    listaSensores.append(sensor)
+idSite = int(idSite) + 1
+sitesList = generate_random_data(latitude, longitude, 2, int(idSite))
+sensor = Sensor.Sensor( 3,"phSolo",2,sitesList)
+lastSite = sitesList[len(sitesList) -1]
+idSite = lastSite.getId()
+print(idSite)
+listaSensores.append(sensor)
 
-    idSite = int(idSite) + 1
-    sitesList = generate_random_data(latitude, longitude, 5, int(idSite))
-    sensor = Sensor.Sensor(4,"lixeira",5, sitesList)
-    lastSite = sitesList[len(sitesList) -1]
-    idSite = lastSite.getId()
-    print(idSite)
-    listaSensores.append(sensor)  
-
-    started = 'true'
+idSite = int(idSite) + 1
+sitesList = generate_random_data(latitude, longitude, 5, int(idSite))
+sensor = Sensor.Sensor(4,"lixeira",5, sitesList)
+lastSite = sitesList[len(sitesList) -1]
+idSite = lastSite.getId()
+print(idSite)
+listaSensores.append(sensor)  
 
 listaAppsCadastradas = []
 dadosColetados = []
@@ -103,6 +99,12 @@ def web_service():
         retorno += str(s.getId())+ "&nbsp;!!&nbsp;" + s.getNome()+ "&nbsp;!!&nbsp;" + str(s.getQuantidade()) + "&nbsp;!!&nbsp;" + str(s.getSolicitado())+  "<br> "
     return retorno
 
+@app.route("/get_sites")
+def get_sites():
+    _tmp = []
+    for l in listaSites:
+        _tmp +=  [l.toJSON()]
+    return Response(json.dumps(_tmp),  mimetype='application/json')
 
 @app.route("/get_sensors")
 def get_sensors():
@@ -120,9 +122,6 @@ def get_file():
                        mimetype="text/plain",
                        headers={"Content-Disposition":
                                     "attachment;filename=flightplan.mavlink"})
-
-
-
 
 @app.route("/autonomia", methods=['GET'])
 def set_autonomy():
@@ -149,49 +148,36 @@ def create_app():
 
 @app.route("/planejaVoo", methods=['GET'])
 def plan_flight():
-
-    global listaSites
-
-    for x in listaSensores:
-        if x.getSolicitado() == True:
-            sites = x.getSites()
-            for y in sites:
-                listaSites.append(y)
-
     print('Sites List: ' +str(listaSites))
     min_energy = otim.getMinimoEnergia(listaSites)
-    #percentual = (float(minimoEnergia)/autonomy) * 100
+    percentual = (float(min_energy)/autonomy) * 100
 
     print('o gasto mínimo de energia é: ' + str(min_energy) + '% <br>')
     
-    dict_of_neighbours = tabu.generate_neighbours(listaSites)
+    #dict_of_neighbours = tabu.generate_neighbours(listaSites)
+
+    #first = tabu.generate_first_solution(dict_of_neighbours)
+    #print(first)
+
+    #result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSites)*10)
+
+    #print(result[0])
+    #print(result[1])
 
 
-    """     positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
-        energy_costs = dict( ((s1,s2), tabu.calculate_energy_cost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
-    """
-    first = tabu.generate_first_solution(dict_of_neighbours)
-    print(first)
-
-    result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSites)*10)
-
-
-    print(result[0])
-    print(result[1])
-
-
-    """    retorno = ('O uso da autonomia para visitar todos os sensores está em  ' 
-        + str(percentual) + '% <br>'
-        + 'o gasto mínimo de energia é: ' + str(minimoEnergia) + '% <br>'
-        + 'Estatísticas para realização do voo: <br>' 
-        + otim.getMaximoDeSensores(listaSites, autonomy) ) """
+    retorno = ('O uso da autonomia para visitar todos os sensores está em  ' 
+    + str(percentual) + '% <br>'
+    + 'o gasto mínimo de energia é: ' + str(min_energy) + '% <br>'
+    + 'Estatísticas para realização do voo: <br>' 
+    + otim.getMaximoDeSensores(listaSites, autonomy) ) 
         
-    return ('retorno')    
+    return (retorno)    
     
 @app.route("/solicitaDadosSensor", methods=['GET'])
 def subscribe_for_sensors_data():
     nomeApp = request.args.get('nomeApp')
     tipoSensor = request.args.get('tipoSensor')
+    global listaSensores
 
     isCadastrado = False
     
@@ -209,7 +195,17 @@ def subscribe_for_sensors_data():
                 x.setSolicitado(True)
                 listaSensores.append(x)
     
-        return (plan_flight())          
+    global listaSites
+
+    for x in listaSensores:
+        if x.getSolicitado() == True:
+            sites = x.getSites()
+            for y in sites:
+                listaSites.append(y)
+    
+    print(listaSites)
+
+    return ("ok")          
 
 def run_drone_mqtt(arg, arg2):
     print ("Running thread! Args:", (arg, arg2))

@@ -139,17 +139,15 @@
                   <th>Add to Flight Plan?</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>1,001</td>
-                  <td>Lorem</td>
-                  <td>ipsum</td>
-                  <td>dolor</td>
-                </tr>
+              <tbody id="sensorsList">
                
               </tbody>
             </table>
           </div>
+
+
+          <input type="hidden" value="teste" id="locationSites">
+
         </main>
       </div>
     </div>
@@ -174,9 +172,7 @@
         var uluru = {lat: 48.879049, lng: 2.367448};
         // The map, centered at Uluru
         var map = new google.maps.Map(
-            document.getElementById('map'), {zoom: 4, center: uluru});
-        // The marker, positioned at Uluru
-        var marker = new google.maps.Marker({position: uluru, map: map});
+            document.getElementById('map'), {zoom: 10, center: uluru});
       }
     </script>
           <!--Load the API from the specified URL
@@ -196,26 +192,92 @@
         type : 'GET',
         dataType:'json',
         success : function(data) {              
-          alert('Data: '+data);
+          
+          var $body = $('#sensorsList')
 
-          $(function() {
             $.each(data, function(i, item) {
-                var $tr = $('<tr>').append(
-                    $('<td>').text(i.id),
-                    $('<td>').text(i.nome),
-                    $('<td>').text(i.quantidade),
+
+              var j = JSON.parse(item)
+
+              var $tr = $('<tr>').append(
+                    $('<td>').text(j.id),
+                    $('<td>').text(j.nome),
+                    $('<td>').text(j.quantidade),
                     $('<td>').text("False")
 
-                ); //.appendTo('#records_table');
-                console.log($tr.wrap('<p>').html());
-              });
-          });
+                ); 
+              $body.append($tr)
 
+              });
         },
         error : function(request,error){
           alert("Request: "+JSON.stringify(request));
         }
       });
+
+
+      $( document ).ready(function() {
+        $.ajax({
+          url : 'http://127.0.0.1:5000/get_sites',
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            
+            var $inputHidden = $('#locationSites')
+
+            
+            console.log(data)
+
+
+            var myLatlng;
+            var mapOptions;
+            var map;
+            var marker;
+            var lat =  [];
+            var logt =  [];
+
+
+            $.each(data, function(i, item) {
+
+              var j = JSON.parse(item)
+              lat [i] = j.posicao[0]
+              logt [i] = j.posicao[1]
+
+
+            });
+
+
+            console.log(lat)
+            console.log(logt)
+
+
+            mapOptions = {
+                zoom: 20,
+                center: {lat: 48.879049, lng: 2.367448}
+              }
+              
+            map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+            for (i = 0; i < lat.length; i++) { 
+              marker = new google.maps.Marker({
+                position: new google.maps.LatLng(lat[i], logt[i]),
+                title:"Hello World!",
+                map: map
+              });
+            }
+
+
+
+          },
+          error : function(request,error){
+            alert("Request: "+JSON.stringify(request));
+          }
+        });
+      });
+
+
+
+
     </script>
 
 
