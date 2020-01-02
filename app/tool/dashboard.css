@@ -8,6 +8,13 @@ body {
   vertical-align: text-bottom;
 }
 
+
+#map {
+  height: 400px;  /* The height is 400 pixels */
+  width: 100%;  /* The width is the width of the web page */
+ }
+
+
 /*
  * Sidebar
  */
@@ -91,3 +98,5 @@ body {
 
 .border-top { border-top: 1px solid #e5e5e5; }
 .border-bottom { border-bottom: 1px solid #e5e5e5; }
+
+

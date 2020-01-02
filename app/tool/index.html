@@ -1,3 +1,4 @@
+ 
 <!doctype html>
 <html lang="en">
   <head>
@@ -7,7 +8,7 @@
     <meta name="author" content="">
     <link rel="icon" href="assets/img/favicons/favicon.ico">
 
-    <title>Dashboard Template for Bootstrap</title>
+    <title>Dashboard Flight Plan</title>
 
     <link rel="canonical" href="#">
 
@@ -17,15 +18,7 @@
     <!-- Custom styles for this template -->
     <link href="dashboard.css" rel="stylesheet">
 
-
-    <style>
-      /* Set the size of the div element that contains the map */
-     #map {
-       height: 400px;  /* The height is 400 pixels */
-       width: 100%;  /* The width is the width of the web page */
-      }
-   </style>
-
+    <script src="https://kit.fontawesome.com/30f0ec8f89.js" crossorigin="anonymous"></script>
 
   </head>
 
@@ -119,46 +112,81 @@
         </nav>
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+
+          
+          <div class='row'>
+            <div class='col-md-6'>
+              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h2">Dashboard</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                </div>
+              </div>
+              <!--The div element for the map -->
+              <div id="map"></div>
+            
+            </div>
+            <div class='col-md-6'>
+              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h2">Sensors List</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Sensor Type</th>
+                      <th>Amount</th>
+                      <th>Add to Flight Plan?</th>
+                      <th>Options</th>
+    
+                    </tr>
+                  </thead>
+                  <tbody id="sensorsList">
+                   
+                  </tbody>
+                </table>
+              </div>
+            
+            </div>  
+          </div>
+
+
+
+          <br>
+
+         
+
+
+          <br>
+
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2">Dashboard</h1>
+            <h4 class="h4">Generate Flight Plan</h4>
             <div class="btn-toolbar mb-2 mb-md-0">
             </div>
           </div>
 
-          <input type="hidden" id="test3" value="Mickey Mouse">
-
-          <!--The div element for the map -->
-          <div id="map"></div>
-
-          
-
-          <h2>Sensors List</h2>
-          <div class="table-responsive">
-            <table class="table table-striped table-sm">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Sensor Type</th>
-                  <th>Amount</th>
-                  <th>Add to Flight Plan?</th>
-                </tr>
-              </thead>
-              <tbody id="listSensors">
-
-
-
-               
-              </tbody>
-            </table>
+          <div class="input-group">
+            <select class="custom-select" id="algorithm" name="algorithm">
+              <option selected>Choose the Algorithm...</option>
+              <option value="1">MILP</option>
+              <option value="2">Tabu Search</option>
+              <option value="3">Brutal Force</option>
+            </select>
+            <div class="input-group-append">
+              <button onclick="javascript: generateFlightPlan()" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
+            </div>
           </div>
+
+          <div id='result'>
+          </div>
+
+          <input type="hidden" value="" id="locationSites">
+
         </main>
       </div>
     </div>
-
-
-
-
-
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
@@ -174,37 +202,14 @@
     </script>
 
     <script>
-
-          $.ajax({
-              url : 'http://127.0.0.1:5000/get_sites',
-              type : 'GET',
-              dataType:'json',
-              success : function(data) {  
-
-
-                var html = $('#test3');
-
-                var json = JSON.parse(data)
-                var input = JSON.stringify(json)
-                console.log(input)
-
-                html.val(input);
-
-              }
-          });   
-
-          function initMap() {
-
-              // The location of Uluru
-              var uluru = {lat: 48.879049, lng: 2.367448};
-              // The map, centered at Uluru
-              var map = new google.maps.Map(
-                  document.getElementById('map'), {zoom: 50, center: uluru});
-          }
-
-
-
-
+      // Initialize and add the map
+      function initMap() {
+        // The location of Uluru
+        var uluru = {lat: 48.879049, lng: 2.367448};
+        // The map, centered at Uluru
+        var map = new google.maps.Map(
+            document.getElementById('map'), {zoom: 10, center: uluru});
+      }
     </script>
           <!--Load the API from the specified URL
           * The async attribute allows the browser to render the page while the API loads
@@ -217,42 +222,137 @@
 
 
     <script> 
+
+
+
+      function generateFlightPlan(){
+
+        var algorithm = $('select[name=algorithm]').val()
+
+        $.ajax({
+          url : 'http://127.0.0.1:5000/generateFlightPlan?algorithm='+ algorithm,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            $('#result').html(data)
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }
+
+      function addSensorsToPlan(sensorType){
+        $.ajax({
+          url : 'http://127.0.0.1:5000/addSensors?tipoSensor='+sensorType,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            console.log(data)
+            location.reload()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }
+        
+      function removeSensorsFromPlan(sensorType){
+        $.ajax({
+          url : 'http://127.0.0.1:5000/removeSensors?tipoSensor='+sensorType,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            console.log(data)
+            location.reload()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+      }
+
     
       $.ajax({
         url : 'http://127.0.0.1:5000/get_sensors',
         type : 'GET',
         dataType:'json',
         success : function(data) {              
-          var html = $('#listSensors');
-          $.each(data, function(i, item) {
-            var sensors = JSON.parse(item)
-            var $tr = $('<tr>').append(
-              $('<td>').text(sensors.id),
-              $('<td>').text(sensors.nome),
-              $('<td>').text(sensors.quantidade),
-              $('<td>').text(sensors.solicitado)
-            ); 
-            html.append($tr)
-          }); 
+          
+          var $body = $('#sensorsList')
+            $.each(data, function(i, item) {
+              var j = JSON.parse(item)
+              var $tr = $('<tr>').append(
+                    $('<td>').text(j.id),
+                    $('<td>').text(j.nome),
+                    $('<td>').text(j.quantidade),
+                    $('<td>').text(j.solicitado),
+                    $('<td>').html(' <a href="javascript:addSensorsToPlan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'),
+                    $('<td>').html(' <a href="javascript:removeSensorsFromPlan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
 
+
+                ); 
+
+              $body.append($tr)
+
+            });
         },
-        
         error : function(request,error){
           alert("Request: "+JSON.stringify(request));
         }
-
       });
 
+      $( document ).ready(function() {
+        $.ajax({
+          url : 'http://127.0.0.1:5000/get_sites',
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+
+            console.log(data)
+            var myLatlng;
+            var mapOptions;
+            var map;
+            var marker;
+            var lat =  [];
+            var logt =  [];
+            var labels =  [];
 
 
-      var html = $('#test3');
-      console.log(html.val())
+            $.each(data, function(i, item) {
+              var j = JSON.parse(item)
+              lat [i] = j.posicao[0]
+              logt [i] = j.posicao[1]
+              labels [i] = j.sensorType
 
+            });
+            console.log(lat)
+            console.log(logt)
+            mapOptions = {
+                zoom: 20,
+                center: {lat: 48.879049, lng: 2.367448}
+              }
+              
+            map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            for (i = 0; i < lat.length; i++) { 
+              marker = new google.maps.Marker({
+                position: new google.maps.LatLng(lat[i], logt[i]),
+                label: ''+labels[i],
+                map: map
+              });
+            }
+          },
+          error : function(request,error){
+            alert("Request: "+JSON.stringify(request));
+          }
+        });
+      });
     </script>
-
-
-
-
 
 
 

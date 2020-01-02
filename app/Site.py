@@ -1,21 +1,21 @@
 '''
 Created on Jun 1, 2019
-
 @author: lucassoares
 '''
 import math
 import numpy as np
 
 import utm
+
 import json
 
 
-
 class Site():
-    def __init__(self, id, posicao, isRouted):
+    def __init__(self, id, posicao, isRouted, sensorType):
         self.id = id
         self.posicao = posicao
         self.isRouted = isRouted
+        self.sensorType = sensorType
      #   self.demand = demand
 
     def setId(self, id):
@@ -57,6 +57,12 @@ class Site():
     
     def toString(self):
         return str(id)  
-
+    
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+    def setSensorType(self, sensorType):
+        self.sensorType = sensorType
+
+    def getSensorType(self):
+        return self.sensorType
