@@ -28,7 +28,6 @@ def get_next_site(parent, non_zero_edges):
         return edges
 
 def get_line_flight_plan(sites, id):
-        print(str(id))
         for s in sites:
                 if(s.getId() == id ): 
                         coordinates = s.getPosicao()
@@ -63,13 +62,10 @@ def generate_file_flight_plan(tours, listaSites):
         tourFlightPlan = tourFlightPlan.split('breakline')
         del tourFlightPlan[-1]
 
-        print(tourFlightPlan)
-
         index = 2
         for fp in tourFlightPlan:
                 fpTemp = ''
                 f = list(fp)
-                print(f)
                 if (str(f[0]) == ' '):
                         fpTemp = fp.replace(' ' , '', 1) 
                 else:
@@ -143,9 +139,6 @@ def getMinimoEnergia(listaSites):
 
         positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
 
-        # utm_conversion = utm.from_latlon(48.879049,2.367448)
-        # positions['0']=(utm_conversion[0], utm_conversion[1], 0)
-
         energy_costs = dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
 
         for i in sites:
@@ -172,38 +165,42 @@ def getMinimoEnergia(listaSites):
                                 prob += u[i] - u[j] <= (N)*(1-x[(i,j)]) - 1
 
         prob.solve()
-        return(value(prob.objective))
+
+        non_zero_edges = [ e for e in x if value(x[e]) != 0 ]
+        tours = get_next_site('0', non_zero_edges)
+        tours = [ [e] for e in tours ]
+
+        for t in tours:
+                while t[-1][1] !='0':
+                        t.append(get_next_site(t[-1][1], non_zero_edges)[-1])
+
+        z = ''
+        for t in tours:
+                z = (' -> '.join([ a for a,b in t]+['0']))
+
+        print('Valor mínimo:' + str(value(prob.objective)))
+
+        return( z, value(prob.objective))
 
 def getMaximoDeSensores(listaSites, autonomia):
-        sites = ['0']
-                
+        
+        sites = []
         for site in listaSites:
             sites.append(site.getId())
 
-        #make some positions (so we can plot this)
         positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
-        
-        utm_conversion = utm.from_latlon(48.879049,2.367448)
-        positions['0']=(utm_conversion[0], utm_conversion[1], 0)
-
-        #straight line distance for simplicity
-        d = lambda p1,p2: np.sqrt( (p1[0]-p2[0])**2+ (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2)
-
-        #calculate all the pairs
-        distances=dict( ((s1,s2), d(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
+        energy_costs=dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
 
         #the number of sales people 
         K = 1 
 
-        #create the problme
         prob=LpProblem("vehicle",LpMaximize)
 
-        #indicator variable if site i is connected to site j in the tour
-        x = LpVariable.dicts('x',distances, 0,1,LpBinary)
+        x = LpVariable.dicts('x',energy_costs, 0,1,LpBinary)
+
         #dummy vars to eliminate subtours
         u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
 
-        #the objective
         cost = (lpSum([x[(i,j)] for (i,j) in x]))
         prob+=cost      
 
@@ -216,7 +213,7 @@ def getMaximoDeSensores(listaSites, autonomia):
         for k in sites:
                 prob+= lpSum([ x[(k,'0')] for k in sites if (k, '0') in x]) == 1
 
-        prob+= lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ]) <= autonomia
+        prob+= lpSum([  x[(i,j)]  * energy_costs[(i,j)]for (i,j) in energy_costs ]) <= autonomia
 
         
         #subtour elimination
@@ -228,27 +225,29 @@ def getMaximoDeSensores(listaSites, autonomia):
 
         prob.solve()                
         
-        distanciaTotal = 0
+        total_energy_cost = 0
         for i in sites:
             for j in sites:
                 if i != j :
-                    distanciaTotal += value(x[(i,j)])  * distances[(i,j)]
+                    total_energy_cost += value(x[(i,j)])  * energy_costs[(i,j)]
         
-        totalSensores = -1
-        for i in sites:
-            for j in sites:
-                if i != j:
-                    totalSensores += value(x[(i,j)])
 
         maxSensores = value(prob.objective)
         global minimoEnergia
-        minimoEnergia = getMinimoEnergiaComMaxSensores(maxSensores, distances, listaSites)
+        minimoEnergia = getMinimoEnergiaComMaxSensores(maxSensores, energy_costs, listaSites)
             
-        return('O maximo de sensores é: ' + str(maxSensores-1) +' <br> O custo inicial para realização do voo seria: '+ str(distanciaTotal)+' <br> O mínimo de custo alcançado é: '+str(minimoEnergia))
+        return('O maximo de sensores é: ' 
+        + str(maxSensores-1) 
+        +' <br> O custo inicial para realização do voo seria: '
+        + str(total_energy_cost)
+        +' <br> O mínimo de custo alcançado é: '
+        +str(minimoEnergia))
     
-def getMinimoEnergiaComMaxSensores(maxSensores, distances, listaSites):
 
-        sites = ['0']
+
+def getMinimoEnergiaComMaxSensores(maxSensores, energy_costs, listaSites):
+
+        sites = []
                 
         for site in listaSites:
             sites.append(site.getId())
@@ -256,11 +255,11 @@ def getMinimoEnergiaComMaxSensores(maxSensores, distances, listaSites):
         #create the problme
         prob=LpProblem("vehicle",LpMinimize)
         #indicator variable if site i is connected to site j in the tour
-        x = LpVariable.dicts('x',distances, 0,1,LpBinary)
+        x = LpVariable.dicts('x',energy_costs, 0,1,LpBinary)
         #dummy vars to eliminate subtours
         u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
         #the objective
-        cost =  ( lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ])) 
+        cost =  ( lpSum([  x[(i,j)]  * energy_costs[(i,j)]for (i,j) in energy_costs ])) 
         prob+=cost
 
         for k in sites:
@@ -291,8 +290,9 @@ def getMinimoEnergiaComMaxSensores(maxSensores, distances, listaSites):
                 while t[-1][1] !='0':
                         t.append(get_next_site(t[-1][1], non_zero_edges)[-1])
 
+        z = ''
         for t in tours:
-                print(' -> '.join([ a for a,b in t]+['0']))
+                z = (' -> '.join([ a for a,b in t]+['0']))
 
 
         generate_file_flight_plan(tours, listaSites)

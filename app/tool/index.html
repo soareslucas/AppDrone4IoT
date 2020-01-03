@@ -149,6 +149,8 @@
                 </table>
               </div>
             
+
+            <button onclick="javascript: newPoints()" type="button" class="btn btn-secondary btn-lg">New Points</button>
             </div>  
           </div>
 
@@ -223,7 +225,22 @@
 
     <script> 
 
+      function newPoints(){
 
+        $.ajax({
+          url : 'http://127.0.0.1:5000/newPoints',
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            location.reload()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }
 
       function generateFlightPlan(){
 
@@ -292,9 +309,8 @@
                     $('<td>').text(j.nome),
                     $('<td>').text(j.quantidade),
                     $('<td>').text(j.solicitado),
-                    $('<td>').html(' <a href="javascript:addSensorsToPlan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'),
-                    $('<td>').html(' <a href="javascript:removeSensorsFromPlan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
-
+                    $('<td>').html(' <a href="javascript:addSensorsToPlan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
+                      + ' <a href="javascript:removeSensorsFromPlan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
 
                 ); 
 
@@ -321,37 +337,62 @@
             var marker;
             var lat =  [];
             var logt =  [];
-            var labels =  [];
-
+            var alt =  [];
+            var sensorType =  [];
+            var id =  [];
 
             $.each(data, function(i, item) {
               var j = JSON.parse(item)
               lat [i] = j.posicao[0]
               logt [i] = j.posicao[1]
-              labels [i] = j.sensorType
+              alt [i] = j.posicao[2]
+
+              sensorType [i] = j.sensorType
+              id [i] = j.id
 
             });
+            
             console.log(lat)
             console.log(logt)
+            
             mapOptions = {
-                zoom: 20,
+                zoom: 17,
                 center: {lat: 48.879049, lng: 2.367448}
-              }
+            }
               
             map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
             for (i = 0; i < lat.length; i++) { 
+
               marker = new google.maps.Marker({
                 position: new google.maps.LatLng(lat[i], logt[i]),
-                label: ''+labels[i],
+                label: ''+ id [i],
                 map: map
               });
+
+              addInfoWindow(marker, 'Altitude:'+alt[i]+' <br>'+'Tipo do sensor:'+sensorType[i])
             }
           },
           error : function(request,error){
             alert("Request: "+JSON.stringify(request));
+            alert("Request: "+JSON.stringify(error));
+
           }
         });
       });
+
+      function addInfoWindow(marker, message) {
+
+        var infoWindow = new google.maps.InfoWindow({
+            content: message
+        });
+
+        google.maps.event.addListener(marker, 'click', function () {
+            infoWindow.open(map, marker);
+        });
+      }
+
+
     </script>
 
 
