@@ -181,7 +181,7 @@
             </div>
           </div>
 
-          <div id='result'>
+          <div class='bd-example' id='result'>
           </div>
 
           <input type="hidden" value="" id="locationSites">
@@ -245,6 +245,8 @@
       function generateFlightPlan(){
 
         var algorithm = $('select[name=algorithm]').val()
+
+        $('#result').html('<div class="spinner-border"> </div>') 
 
         $.ajax({
           url : 'http://127.0.0.1:5000/generateFlightPlan?algorithm='+ algorithm,
@@ -356,7 +358,7 @@
             console.log(logt)
             
             mapOptions = {
-                zoom: 17,
+                zoom: 15,
                 center: {lat: 48.879049, lng: 2.367448}
             }
               

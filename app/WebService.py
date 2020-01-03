@@ -38,8 +38,8 @@ autonomy = 59940
 def generate_random_data(lat, lon, num_rows,idSite, idSensor):
     sitesTemp = []
     for _ in range(num_rows):
-        dec_lat = random.random()/1000
-        dec_lon = random.random()/1000
+        dec_lat = random.random()/100
+        dec_lon = random.random()/100
         site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,20)) , "false", idSensor)
         idSite += 1
         sitesTemp.append(site)
@@ -238,32 +238,32 @@ def new_points():
     listaSites = [site]
     idSite = 1
 
-    sitesList = generate_random_data(latitude, longitude, 2, idSite, 1)
-    sensor = Sensor.Sensor(1,"umidade",2, sitesList)
+    sitesList = generate_random_data(latitude, longitude, 16, idSite, 1)
+    sensor = Sensor.Sensor(1,"umidade",16, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     print(idSite)
     listaSensores = [sensor]
 
     idSite = int(idSite) + 1
-    sitesList = generate_random_data(latitude, longitude, 4, int(idSite), 2)
-    sensor = Sensor.Sensor( 2,"temperatura",4, sitesList)
+    sitesList = generate_random_data(latitude, longitude, 42, int(idSite), 2)
+    sensor = Sensor.Sensor( 2,"temperatura",42, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     print(idSite)
     listaSensores.append(sensor)
 
     idSite = int(idSite) + 1
-    sitesList = generate_random_data(latitude, longitude, 2, int(idSite), 3)
-    sensor = Sensor.Sensor( 3,"phSolo",2,sitesList)
+    sitesList = generate_random_data(latitude, longitude, 32, int(idSite), 3)
+    sensor = Sensor.Sensor( 3,"phSolo",32,sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     print(idSite)
     listaSensores.append(sensor)
 
     idSite = int(idSite) + 1
-    sitesList = generate_random_data(latitude, longitude, 5, int(idSite), 4)
-    sensor = Sensor.Sensor(4,"lixeira",5, sitesList)
+    sitesList = generate_random_data(latitude, longitude, 25, int(idSite), 4)
+    sensor = Sensor.Sensor(4,"lixeira",25, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     print(idSite)
