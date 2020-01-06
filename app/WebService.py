@@ -13,6 +13,7 @@ import app.Otimizacao as otim
 import app.Sensor as Sensor
 import app.Site as Site
 import app.tabu_search as tabu
+import app.HybridAlgorithm as ha
 from threading import Thread
 import os
 import random
@@ -135,8 +136,8 @@ def plan_flight():
         results += '  '+ str(result[1])
 
     if algorithm == '3':
-        results = ('Brutal Force')
 
+    results = ha.run_ga(listaSites, 500, n_gen, 50, 0.02, verbose=1):
         
     return Response(json.dumps(results),  mimetype='application/json')
     
