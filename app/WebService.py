@@ -9,11 +9,11 @@ from flask import Response
 from flask import request
 from flask_cors import CORS, cross_origin
 import numpy as np
-import app.Otimizacao as otim
-import app.Sensor as Sensor
-import app.Site as Site
-import app.tabu_search as tabu
-import app.HybridAlgorithm as ha
+import Otimizacao as otim
+import Sensor as Sensor
+import Site as Site
+import tabu_search as tabu
+import HybridAlgorithm as ha
 from threading import Thread
 import os
 import random
@@ -136,8 +136,19 @@ def plan_flight():
         results += '  '+ str(result[1])
 
     if algorithm == '3':
+        individual = ha.run_ga(listaSites, 500, 20, 50, 0.02, verbose=1)
+        
+        print('teste')
 
-    results = ha.run_ga(listaSites, 500, n_gen, 50, 0.02, verbose=1):
+        result = individual['route']
+        genes = result.genes
+        route = ''
+
+        for g in genes:
+            route += '-> ' + g.getId()
+
+        results = route
+        results += '  '+ str(result.travel_cost)
         
     return Response(json.dumps(results),  mimetype='application/json')
     
@@ -216,18 +227,6 @@ def set_data():
     dadosColetados.append(dados)
     
     return 'ok'
-    
-    
-@app.route("/getDados", methods=['GET'])
-def get_data():
-    retorno = ''
-    id = 1
-    for s in dadosColetados:
-        retorno += str(id)+': ' + str (s)+  "<br> "
-        id += 1
-    return retorno
-
-
 
 @app.route("/newPoints", methods=['GET'])
 def new_points():

@@ -4,19 +4,72 @@ Created on Jun 1, 2019
 '''
 import math
 import numpy as np
-
 import utm
+from haversine import haversine
 
 import json
 
 
 class Site():
+
+    __distances_table = {}  
+
     def __init__(self, id, posicao, isRouted, sensorType):
         self.id = id
         self.posicao = posicao
         self.isRouted = isRouted
         self.sensorType = sensorType
      #   self.demand = demand
+
+    def calculateEnergyCost(self,p1,p2):
+        # velocity in m/s
+        velocidade = 15
+        # kg/m^-3
+        rho = 1.225
+        # rad/s
+        omega = 20
+        # cm
+        R = 0.5
+        # weight in Newtons
+        W = 19
+        # Drag Coefficient (zero-lift Drag Coefficient)
+        Cd = 0.0225
+        # Frontal Area of the UAV  (m2) 
+        frontalArea = 0.07992
+
+        energy = 0
+        d = np.sqrt( (p1[0]-p2[0])**2+ (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2)
+
+        #straight line distance for simplicity
+        phi =  np.arcsin((  np.abs(p1[2]-p2[2] ) / d))
+        Vh =  velocidade * np.cos(phi)
+        Vv =  velocidade * np.sin(phi)
+        Pp = (1/2) * rho * Cd * frontalArea * np.power(Vh,3)  
+        + ((3.14/4)*4*10*rho*Cd*np.power(omega,2)*np.power(R,4))
+        + ((3.14/4)*4*10*rho*Cd*np.power(omega,2)*np.power(R,4))*3* np.power(Vh/omega*R,2)
+        dividendo =  ( np.power(Vh,2)/ (np.power(omega,2) * np.power(R,2) ) )
+        + np.sqrt( np.power((np.power(Vh,2)/ (np.power(omega,2) * np.power(R,2) )  ),2) 
+        - (4* np.power(W,2)/ (4* (np.power(rho,2)) * np.power(3.14,2) * np.power(omega, 4) * np.power(R,8) ))) 
+        raiz = dividendo / 2
+        lamb =  np.sqrt((raiz))
+        Pi = omega*R*W * lamb 
+        Ph = Pp + Pi;	
+        Pv = 0
+
+        if( ( p1[2]-p2[2] ) > 0 ):
+                raizPv = np.power(Vv, 2) - (  (2*W)/ (rho *3.14* np.power(R,2) ) )
+                if(raizPv < 0):
+                        raizPv = np.power(15, 2) - (  (2*W)/ (rho *3.14* np.power(R,2) ) )
+                        Pv = ( (W/2) * 15) - ( (W/2) * np.sqrt(raizPv) )
+                else:
+                        Pv = ((W/2) * Vv) - ((W/2) * np.sqrt(raizPv));			
+        else:
+                if( (p1[2]-p2[2] ) < 0 ):
+                        Pv = ( (W/2) * Vv) + ( (W/2) * np.sqrt( np.power(Vv, 2) + (  (2*W)/ (rho *3.14* np.power(R,2) ) ) ) )
+
+        energy = (d / velocidade) * (Pv + Ph)
+
+        return(energy)
 
     def setId(self, id):
         self.id = id
@@ -36,16 +89,7 @@ class Site():
     def isRouted(self):
         return self.isRouted
 
-
-    #def setDemand(self, demand):
-    #    self.demand = demand
-
-   # def getDemand(self):
-   #     return self.demand
-
-
     def getNewPosicao(self):
-
         print( 'Posicao dos pontos  : ' + self.id + ' ' + str(self.posicao[0]) + ' e '+ str(self.posicao[1]) + ' ' + str(self.posicao[2])  )
         utm_conversion = utm.from_latlon(self.posicao[0],self.posicao[1])
         newPosition = [0,0,0]
@@ -66,3 +110,24 @@ class Site():
 
     def getSensorType(self):
         return self.sensorType
+
+    def get_distance_to(self, dest):
+        origin = (self.posicao[0], self.posicao[1])
+        destination = (dest.posicao[0], dest.posicao[1])
+
+        forward_key = origin + destination
+        backward_key = destination + origin
+
+        if forward_key in Site.__distances_table:
+            return Site.__distances_table[forward_key]
+
+        if backward_key in Site.__distances_table:
+            return Site.__distances_table[backward_key]
+
+        p1 = self.getNewPosicao()
+        p2 = dest.getNewPosicao()
+
+        dist = self.calculateEnergyCost(p1,p2)
+        Site.__distances_table[forward_key] = dist
+
+        return dist

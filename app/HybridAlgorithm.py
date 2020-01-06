@@ -2,34 +2,9 @@ from sys import maxsize
 from time import time
 from random import random, randint, sample
 from haversine import haversine
+import numpy as np
+import json
 
-
-class Gene:  # City
-    # keep distances from cities saved in a table to improve execution time.
-    __distances_table = {}
-
-    def __init__(self, name, lat, lng):
-        self.name = name
-        self.lat = lat
-        self.lng = lng
-
-    def get_distance_to(self, dest):
-        origin = (self.lat, self.lng)
-        dest = (dest.lat, dest.lng)
-
-        forward_key = origin + dest
-        backward_key = dest + origin
-
-        if forward_key in Gene.__distances_table:
-            return Gene.__distances_table[forward_key]
-
-        if backward_key in Gene.__distances_table:
-            return Gene.__distances_table[backward_key]
-
-        dist = int(haversine(origin, dest))
-        Gene.__distances_table[forward_key] = dist
-
-        return dist
 
 
 class Individual:  # Route: possible solution to TSP
@@ -72,6 +47,10 @@ class Individual:  # Route: possible solution to TSP
         self.__travel_cost = 0
         self.__fitness = 0
 
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+
 
 class Population:  # Population of individuals
     def __init__(self, individuals):
@@ -80,6 +59,9 @@ class Population:  # Population of individuals
     @staticmethod
     def gen_individuals(sz, genes):
         individuals = []
+
+        
+
         for _ in range(sz):
             individuals.append(Individual(sample(genes, len(genes))))
         return Population(individuals)
@@ -140,7 +122,7 @@ def crossover(parent_1, parent_2):
                 child.genes[i] = parent.genes[j]
                 j += 1
 
-    genes_n = len(parent_1.genes)
+    genes_n = len(parent_1. )
     child = Individual([None for _ in range(genes_n)])
     fill_with_parent1_genes(child, parent_1, genes_n // 2)
     fill_with_parent2_genes(child, parent_2)
