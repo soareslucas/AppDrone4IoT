@@ -56,14 +56,23 @@ class Population:  # Population of individuals
     def __init__(self, individuals):
         self.individuals = individuals
 
+
+
+
     @staticmethod
     def gen_individuals(sz, genes):
-        individuals = []
 
-        
+        individuals = []        
+        _temp = genes[1:]
 
         for _ in range(sz):
-            individuals.append(Individual(sample(genes, len(genes))))
+            individual = []
+            individual.append(genes[0])
+            _individual = sample(_temp, len(_temp))
+            for i in _individual:
+                individual.append(i)
+            individuals.append(Individual(individual))
+
         return Population(individuals)
 
     def add(self, route):
@@ -108,24 +117,27 @@ def evolve(pop, tourn_size, mut_rate):
 
 def crossover(parent_1, parent_2):
     def fill_with_parent1_genes(child, parent, genes_n):
-        start_at = randint(0, len(parent.genes)-genes_n-1)
+        
+        start_at = randint(1, len(parent.genes)-genes_n-1)
         finish_at = start_at + genes_n
         for i in range(start_at, finish_at):
-            child.genes[i] = parent_1.genes[i]
+                child.genes[i] = parent_1.genes[i]
 
     def fill_with_parent2_genes(child, parent):
         j = 0
-        for i in range(0, len(parent.genes)):
+        for i in range(1, len(parent.genes)):
             if child.genes[i] == None:
                 while parent.genes[j] in child.genes:
                     j += 1
                 child.genes[i] = parent.genes[j]
                 j += 1
-
-    genes_n = len(parent_1. )
-    child = Individual([None for _ in range(genes_n)])
-    fill_with_parent1_genes(child, parent_1, genes_n // 2)
+                
+    genes_n = len(parent_1.genes)
+    child = Individual([None for _ in range(genes_n-1)])
+    fill_with_parent1_genes(child, parent_1, (genes_n-1) // 2)
     fill_with_parent2_genes(child, parent_2)
+
+    child.genes[0] = parent_1.genes[0]
 
     return child
 
@@ -134,7 +146,8 @@ def mutate(individual, rate):
     for _ in range(len(individual.genes)):
         if random() < rate:
             sel_genes = sample(individual.genes, 2)
-            individual.swap(sel_genes[0], sel_genes[1])
+            if(not sel_genes[0].getId() == 0):
+                individual.swap(sel_genes[0], sel_genes[1])
 
 
 def selection(population, competitors_n):

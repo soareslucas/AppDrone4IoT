@@ -113,10 +113,7 @@ def plan_flight():
     algorithm = request.args.get('algorithm')
 
     if algorithm == '1':
-
         result = otim.getMinimoEnergia(listaSites)
-
-        print(result)
         results = str(result[0])
         results += '  '+ str(result[1])
 
@@ -137,9 +134,6 @@ def plan_flight():
 
     if algorithm == '3':
         individual = ha.run_ga(listaSites, 500, 20, 50, 0.02, verbose=1)
-        
-        print('teste')
-
         result = individual['route']
         genes = result.genes
         route = ''
@@ -198,17 +192,12 @@ def unsubscribe_sensors():
             x.setSolicitado(False)
             listaSensores.append(x)
 
-    print(tipoSensor)
-
     _temp = []
     _temp = listaSites.copy()
 
     for y in listaSites:
         if str(y.getSensorType()) == tipoSensor:
-            print(str(y.getSensorType()))
             _temp.remove(y)
-
-    print(_temp)
 
     listaSites = _temp.copy()
 
@@ -242,7 +231,6 @@ def new_points():
     sensor = Sensor.Sensor(1,"umidade",16, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
-    print(idSite)
     listaSensores = [sensor]
 
     idSite = int(idSite) + 1
@@ -250,7 +238,6 @@ def new_points():
     sensor = Sensor.Sensor( 2,"temperatura",42, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
-    print(idSite)
     listaSensores.append(sensor)
 
     idSite = int(idSite) + 1
@@ -258,7 +245,6 @@ def new_points():
     sensor = Sensor.Sensor( 3,"phSolo",32,sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
-    print(idSite)
     listaSensores.append(sensor)
 
     idSite = int(idSite) + 1
@@ -266,7 +252,6 @@ def new_points():
     sensor = Sensor.Sensor(4,"lixeira",25, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
-    print(idSite)
     listaSensores.append(sensor)  
 
     return Response(json.dumps('ok'),  mimetype='application/json')
