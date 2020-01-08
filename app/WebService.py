@@ -12,8 +12,9 @@ import numpy as np
 import Otimizacao as otim
 import Sensor as Sensor
 import Site as Site
-import tabu_search as tabu
+import TabuSearch as tabu
 import HybridAlgorithm as ha
+import Utils as util
 from threading import Thread
 import os
 import random
@@ -114,8 +115,11 @@ def plan_flight():
 
     if algorithm == '1':
         result = otim.getMinimoEnergia(listaSites)
+
         results = str(result[0])
         results += '  '+ str(result[1])
+        util.generate_file_flight_plan(result[2], listaSites, 'milp_flightplan')
+
 
         """         percentual = (float(min_energy)/autonomy) * 100
         results = ('O uso da autonomia para visitar todos os sensores está em  ' 
@@ -130,9 +134,49 @@ def plan_flight():
         print(first)
         result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSites)*10)
         results = str(result[0])
+
+        route = []
+        route = result[0]
+        route.append(0)
+
+        util.generate_file_flight_plan(result[0], listaSites, 'tabu_flightplan')
+
+
         results += '  '+ str(result[1])
 
     if algorithm == '3':
+        individual = ha.run_ga(listaSites, 500, 20, 50, 0.02, verbose=1)
+        result = individual['route']
+        genes = result.genes
+        route = ''
+        route_list = []
+        for g in genes:
+            route += '-> ' + g.getId()
+            route_list.append(int(g.getId()))
+        
+        route_list.append(0)
+        util.generate_file_flight_plan(route_list, listaSites, 'hybrid_flightplan')
+
+
+        results = route
+        results += '  '+ str(result.travel_cost)
+
+    if algorithm == '4':
+
+        # MILP
+        result = otim.getMinimoEnergia(listaSites)
+        results = str(result[0])
+        results += '  '+ str(result[1])
+
+        # Tabu
+        dict_of_neighbours = tabu.generate_neighbours(listaSites)
+        first = tabu.generate_first_solution(dict_of_neighbours)
+        print(first)
+        result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSites)*10)
+        results += str(result[0])
+        results += ' '+ str(result[1])
+
+        # Hybrid
         individual = ha.run_ga(listaSites, 500, 20, 50, 0.02, verbose=1)
         result = individual['route']
         genes = result.genes
@@ -141,8 +185,9 @@ def plan_flight():
         for g in genes:
             route += '-> ' + g.getId()
 
-        results = route
+        results += route
         results += '  '+ str(result.travel_cost)
+
         
     return Response(json.dumps(results),  mimetype='application/json')
     

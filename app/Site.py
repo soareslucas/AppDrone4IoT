@@ -96,7 +96,6 @@ class Site():
         newPosition[0] = utm_conversion[0]
         newPosition[1] = utm_conversion[1]
         newPosition[2] = self.posicao[2]
-        print(str())
         return newPosition
     
     def toString(self):

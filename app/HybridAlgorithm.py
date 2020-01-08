@@ -40,7 +40,7 @@ class Individual:  # Route: possible solution to TSP
                     dest = self.genes[i+1]
 
                 self.__travel_cost += origin.get_distance_to(dest)
-
+                
         return self.__travel_cost
 
     def __reset_params(self):
@@ -55,9 +55,6 @@ class Individual:  # Route: possible solution to TSP
 class Population:  # Population of individuals
     def __init__(self, individuals):
         self.individuals = individuals
-
-
-
 
     @staticmethod
     def gen_individuals(sz, genes):
@@ -124,7 +121,7 @@ def crossover(parent_1, parent_2):
                 child.genes[i] = parent_1.genes[i]
 
     def fill_with_parent2_genes(child, parent):
-        j = 0
+        j = 1
         for i in range(1, len(parent.genes)):
             if child.genes[i] == None:
                 while parent.genes[j] in child.genes:
@@ -133,7 +130,7 @@ def crossover(parent_1, parent_2):
                 j += 1
                 
     genes_n = len(parent_1.genes)
-    child = Individual([None for _ in range(genes_n-1)])
+    child = Individual([None for _ in range(genes_n)])
     fill_with_parent1_genes(child, parent_1, (genes_n-1) // 2)
     fill_with_parent2_genes(child, parent_2)
 
@@ -143,10 +140,11 @@ def crossover(parent_1, parent_2):
 
 
 def mutate(individual, rate):
-    for _ in range(len(individual.genes)):
+    for i in range(1, len(individual.genes)):
         if random() < rate:
-            sel_genes = sample(individual.genes, 2)
-            if(not sel_genes[0].getId() == 0):
+            _temp = individual.genes[1:]
+            sel_genes = sample(_temp, 2)
+            if(not (sel_genes[0].getId() == 0 or sel_genes[1].getId() == 0) ):
                 individual.swap(sel_genes[0], sel_genes[1])
 
 

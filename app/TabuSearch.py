@@ -1,24 +1,8 @@
-'''
-Created on May 24, 2019
-
-@author: lucassoares
-'''
+import copy
 import math
-from pulp import *
 import numpy as np
-import app.Site as Site
-import app.Vehicle as Vehicle
-import utm
-import random
-import sys
 
 
-vehicles = [Vehicle.Vehicle(59940)]
-BestSolutionVehicles = [Vehicle.Vehicle(59940)]
-cost = 0
-BestSolutionCost = 0
-iterations = 5
-TABU_Horizon = 10
 
 def calculate_energy_cost(p1,p2):
         # velocity in m/s
@@ -69,260 +53,139 @@ def calculate_energy_cost(p1,p2):
         energy = (d / velocidade) * (Pv + Ph)
         return(energy)
 
-def get_energy_cost(listaSites):
-    
-        sites = ['0']
-        for site in listaSites:
-            sites.append(site.getId())
 
-        positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
+def generate_neighbours(points):
+    """This function geenrates a 2D distance matrix between all points
+    Parameters
+    ----------
+    points : type
+        Description of parameter `points`.
+    Returns
+    -------
+    type
+        Description of returned object.
+    """
+    dict_of_neighbours = {}
 
-        utm_conversion = utm.from_latlon(48.879049,2.367448)
-        positions['0']=(utm_conversion[0], utm_conversion[1], 0)
+    for i in points:
+        dict_of_neighbours[int(i.getId())] = {}
+        for j in points:
+            if i!=j:
+                    dict_of_neighbours[int(i.getId())][int(j.getId())]= calculate_energy_cost(i.getNewPosicao(), j.getNewPosicao())
 
-        distances=dict( ((s1,s2), calculate_energy_cost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
+    return dict_of_neighbours
 
-        for i in sites:
-            for j in sites:
-                if i!=j:
-                    print('Custo energético entre '+ i+' e '+ j+' :'+ str(distances[(i,j)]))
-        K = 1 
-        prob=LpProblem("vehicle",LpMinimize)
+def generate_first_solution( dict_of_neighbours):
 
-        x = LpVariable.dicts('x',distances, 0,1,LpBinary)
-        u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
+    start_node = 0
+    end_node = start_node
 
-        cost = (lpSum([  x[(i,j)]  * distances[(i,j)]for (i,j) in distances ]))
-        prob+=cost
-
-        for k in sites:
-            prob+= lpSum([ x[(i,k)] for i in sites if (i,k) in x]) ==1
-            prob+=lpSum([ x[(k,i)] for i in sites if (k,i) in x]) ==1
-
-        N=len(sites)/K
-        for i in sites:
-                for j in sites:
-                        if i != j and (i != '0' and j!= '0') and (i,j) in x:
-                                prob += u[i] - u[j] <= (N)*(1-x[(i,j)]) - 1
-
-        prob.solve()
-        return(value(prob.objective))
-
-def unassigned_customer_exists(sites):
-    for s in sites:
-        if (s.IsRouted()):
-            return "true"
-    return "false"
+    first_solution = []
+    distance = 0
+    visiting = start_node
+    pre_node = None
 
 
-def get_flight_plan_tabu_search(listaSites, min_cost_energy):
-    global cost
-    global vehicles
-    global BestSolutionVehicles
-    global BestSolutionCost
-    global TABU_Horizon
-    global iterations
+    _tmp = copy.deepcopy(dict_of_neighbours[visiting])
 
-    cost = min_cost_energy
+    while not len(_tmp) == 0:
+        next_node = min(_tmp.items(), key=lambda x: x[1])[0]
+        distance += dict_of_neighbours[visiting][next_node]
+        first_solution.append(visiting)
+        pre_node = visiting
+        visiting = next_node
+        _tmp.pop(next_node, None)
 
-    #We use 1-0 exchange move
-    routesFrom = []
-    routesTo = []
+    first_solution.append(visiting)
+    pre_node = visiting
+    first_solution.append(0)
+    distance += dict_of_neighbours[pre_node][end_node]
+    return first_solution, distance
 
-    #MovingNodeDemand = 0
-    VehIndexFrom = 0 
-    VehIndexTo = 0
+def find_neighborhood(solution, dict_of_neighbours, n_opt=1):
+    neighborhood_of_solution = []
+    for n in solution[1:-n_opt]:
 
-    BestNCost = sys.float_info.max
+        idx1 = []
+        n_index = solution.index(n)
+        for i in range(n_opt):
+            idx1.append(n_index+i)
 
-    print(BestNCost)
+        for kn in solution[1:-n_opt]:
 
-    NeighborCost = 0 
+            idx2 = []
+            kn_index = solution.index(kn)
+            for i in range(n_opt):
+                idx2.append(kn_index+i)
+            if bool(
+                set(solution[idx1[0]:(idx1[-1]+1)]) &
+                set(solution[idx2[0]:(idx2[-1]+1)])):
+          
+                continue
 
-    SwapIndexA = -1
-    SwapIndexB = -1
-    SwapRouteFrom = -1
-    SwapRouteTo = -1
-    iteration_number = 0
+            _tmp = copy.deepcopy(solution)
+            for i in range(n_opt):
+                _tmp[idx1[i]] = solution[idx2[i]]
+                _tmp[idx2[i]] = solution[idx1[i]]
 
-    positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
-    utm_conversion = utm.from_latlon(48.879049,2.367448)
-    positions['0']=(utm_conversion[0], utm_conversion[1], 0)
-
-    #straight line distance for simplicity
-    distances=dict( ((s1,s2), calculate_energy_cost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
-
-    DimensionCustomer = len(listaSites)
-    TABU_Matrix = []
-
-    BestSolutionCost = cost
-
-    site = Site.Site(str(0), (48.879049, 2.367448, 0) , False)
-    
-    vehicles[0].add_node(site, 0)
-
-
-    while (True):
-        print ("Done 1")    
-
-
-        for veh in vehicles:
-
-            
-            routesFrom = veh.routes
-
-            print ("Done 2")    
-
-
-            ##Not possible to move depot!
-            for i in range(len(routesFrom)):         
-
-                print ("Done 3")    
-
-                for VehIndexTo in range(len(vehicles)):
-                    routesTo = vehicles[VehIndexTo].routes
-                    print ("Done 4")
-
-                    for j in range(len(routesTo)):         
-
-                        print ("Done 5")
-                        ##Not possible to move after last Depot!
-                        
-                        # MovingNodeDemand = routesFrom[i].demand
-
-                        #if ( (VehIndexFrom == VehIndexTo) or vehicles(VehIndexTo).CheckIfFits(MovingNodeDemand) ):
-                            ##If we assign to a different route check capacity constrains
-                            ##if in the new route is the same no need to check for capacity
-
-                        if ( not (((j == i) or (j == i - 1)))): 
-                            print ("Done 6")
-                            # Not a move that Changes solution cost
-                            MinusCost1 = distances[routesFrom(i - 1).getId()][routesFrom(i).getId()]
-                            MinusCost2 = distances[routesFrom(i).getId()][routesFrom(i + 1).getId()]
-                            MinusCost3 = distances[routesTo(j).getId()][routesTo(j + 1).getId()]
-
-                            AddedCost1 = distances[routesFrom(i - 1).getId()][routesFrom(i + 1).getId()]
-                            AddedCost2 = distances[routesTo(j).getId()][routesFrom(i).getId()]
-                            AddedCost3 = distances[routesFrom(i).getId()][routesTo(j + 1).getId()]
-
-                            ##Check if the move is a Tabu! - If it is Tabu break
-                            if ((TABU_Matrix[routesFrom(i - 1).getId()][routesFrom(i + 1).getId()] != 0)
-                                    or (TABU_Matrix[routesTo(j).getId()][routesFrom(i).getId()] != 0)
-                                    or (TABU_Matrix[routesFrom(i).getId()][routesTo(j + 1).getId()] != 0)):
-                                break
-
-                            NeighborCost = AddedCost1 + AddedCost2 + AddedCost3 - MinusCost1 - MinusCost2 - MinusCost3
-
-                            if (NeighborCost < BestNCost):
-
-                                print ("Done 7")
-                                BestNCost = NeighborCost
-                                SwapIndexA = i
-                                SwapIndexB = j
-                                SwapRouteFrom = VehIndexFrom
-                                SwapRouteTo = VehIndexTo
-
-
-            if ( not len(TABU_Matrix) == 0):
-                for o in range(len(TABU_Matrix(0))):
-                    for p in range(len(TABU_Matrix(0))):
-                        if (TABU_Matrix[o][p] > 0):
-                            TABU_Matrix[o][p] -= 1
-                    
-
-            routesFrom = vehicles[SwapRouteFrom].routes
-            routesTo = vehicles[SwapRouteTo].routes
-            vehicles[SwapRouteFrom].routes = None
-            vehicles[SwapRouteTo].routes = None
-
-            if ( len(routesFrom) > 1):
-                SwapNode = routesFrom[SwapIndexA]
-                NodeIDBefore = routesFrom(SwapIndexA - 1).getId()
-                NodeIDAfter = routesFrom(SwapIndexA + 1).getId()
-            else:
-                NodeIDBefore
-
-            if ( len(routesTo) > 1):
-                NodeID_F = routesTo(SwapIndexB).getId()
-                NodeID_G = routesTo(SwapIndexB + 1).getId()
-
-            
-            randomDelay1 = random.randrange(5)
-            randomDelay2 = random.randrange(5)
-            randomDelay3 = random.randrange(5)
-
-            TABU_Matrix[NodeIDBefore][SwapNode.getId()] = TABU_Horizon + randomDelay1
-            TABU_Matrix[SwapNode.getId()][NodeIDAfter] = TABU_Horizon + randomDelay2
-            TABU_Matrix[NodeID_F][NodeID_G] = TABU_Horizon + randomDelay3
-
-            routesFrom.remove(SwapIndexA)
-
-            if (SwapRouteFrom == SwapRouteTo):
-                if (SwapIndexA < SwapIndexB):
-                    routesTo.insert(SwapIndexB, SwapNode)
-                else:
-                    routesTo.insert(SwapIndexB + 1, SwapNode)
+            distance = 0
+            for k in _tmp[:-1]:
+                next_node = _tmp[_tmp.index(k) + 1]
+                distance = distance + dict_of_neighbours[k][next_node]
                 
-            else:
-                routesTo.insert(SwapIndexB + 1, SwapNode)
-            
+            _tmp.append(distance)
+            if _tmp not in neighborhood_of_solution:
+                neighborhood_of_solution.append(_tmp)
 
-            vehicles[SwapRouteFrom].routes = routesFrom
-            #vehicles[SwapRouteFrom].load -= MovingNodeDemand
+    indexOfLastItemInTheList = len(neighborhood_of_solution[0]) - 1
 
-            vehicles[SwapRouteTo].routes = routesTo
-           # vehicles[SwapRouteTo].load += MovingNodeDemand
-
-            cost += BestNCost
-
-            if (cost < BestSolutionCost):
-                iteration_number = 0
-                SaveBestSolution()
-            else:
-                iteration_number += 1
-
-            if (iterations == iteration_number):
-                break
-
-        vehicles = BestSolutionVehicles
-        cost = BestSolutionCost
+    neighborhood_of_solution.sort(key=lambda x: x[indexOfLastItemInTheList])
+    return neighborhood_of_solution
 
 
-def SaveBestSolution():
-    global cost
-    global vehicles
-    global BestSolutionVehicles
-    global BestSolutionCost
+def tabu_search(first_solution, distance_of_first_solution, dict_of_neighbours, iters, size, n_opt=1):
+    count = 1
+    solution = first_solution
+    tabu_list = list()
+    best_cost = distance_of_first_solution
+    best_solution_ever = solution
+    while count <= iters:
 
-    BestSolutionCost = cost
+        neighborhood = find_neighborhood(solution, dict_of_neighbours, n_opt=n_opt)
+        index_of_best_solution = 0
+        best_solution = neighborhood[index_of_best_solution]
+        best_cost_index = len(best_solution) - 1
+        found = False
+        while found is False:
+            i = 0
+            first_exchange_node, second_exchange_node = [], []
+            n_opt_counter = 0
+            while i < len(best_solution):
+                print (best_solution) 
+                if best_solution[i] != solution[i]:
+                    first_exchange_node.append(best_solution[i])
+                    second_exchange_node.append(solution[i])
+                    n_opt_counter += 1
+                    if n_opt_counter == n_opt:
+                        break
+                i = i + 1
 
-    for j in range(len(vehicles)):
+            exchange = first_exchange_node + second_exchange_node
+            if first_exchange_node + second_exchange_node not in tabu_list and second_exchange_node + first_exchange_node not in tabu_list:
+                tabu_list.append(exchange)
+                found = True
+                solution = best_solution[:-1]
+                cost = neighborhood[index_of_best_solution][best_cost_index]
+                if cost < best_cost:
+                    best_cost = cost
+                    best_solution_ever = solution
+            elif index_of_best_solution < len(neighborhood):
+                best_solution = neighborhood[index_of_best_solution]
+                index_of_best_solution = index_of_best_solution + 1
 
-        BestSolutionVehicles[j].routes = []
+        while len(tabu_list) > size:
+            tabu_list.pop(0)
 
-        if ( not vehicles[j].routes.isEmpty()):
-            for k in range(len(vehicles[j].routes)):
-                n = vehicles[j].routes(k)
-                BestSolutionVehicles[j].routes.append(n)
-
-
-def printsolution():
-
-    global cost
-    global vehicles
-    global BestSolutionVehicles
-    global BestSolutionCost
-
-    for j in range(len(vehicles)):
-        if (not vehicles[j].routes.isEmpty()):
-            print("Vehicle " + j + ":")
-            RoutSize = len(vehicles[j].routes)
-            for k in range(len(vehicles[j].routes)):
-
-                if (k == RoutSize - 1):
-                    print(vehicles[j].routes(k).getId())
-                else:
-                    print(vehicles[j].routes(k).getId() + "->")
-
-    print("\nBest Value: " + cost + "\n");
- 
+        count = count + 1
+    best_solution_ever.pop(-1)
+    return best_solution_ever, best_cost

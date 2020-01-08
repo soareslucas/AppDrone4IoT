@@ -27,61 +27,6 @@ def get_next_site(parent, non_zero_edges):
                 non_zero_edges.remove(e)
         return edges
 
-def get_line_flight_plan(sites, id):
-        for s in sites:
-                if(s.getId() == id ): 
-                        coordinates = s.getPosicao()
-                        lat = str(coordinates[0])
-                        lon = str(coordinates[1])
-                        height = str(coordinates[2])
-                        digits = len(height)
-
-                        if (digits == 1):
-                                height = '00'+height
-                        if (digits == 2):
-                                height = '0'+height
-
-                        return ('1       0       3       16      0.000000        '
-                        + '0.000000        0.000000        0.000000        ' + lat[:9] 
-                        +'       ' + lon[:8] +'        '+height+'.000000      1breakline')
-
-def generate_file_flight_plan(tours, listaSites):
-        text = ('GC WPL 110\n'
-        + '0       1       0       0       0       0       0       0       0       0       0       1\n' 
-        + '1       0       3       16      0.000000        0.000000        0.000000        0.000000        48.879025       2.367450        000.000000      1\n')
-        
-        tourFlightPlan = ''
-        for t in tours:
-                tourFlightPlan += (str([ get_line_flight_plan(listaSites, a) for a,b in t if a != '0' ] ) )
-
-        tourFlightPlan = tourFlightPlan.replace(']', '')
-        tourFlightPlan = tourFlightPlan.replace('[', '')
-        tourFlightPlan = tourFlightPlan.replace(',', '')
-        tourFlightPlan = tourFlightPlan.replace("'", '')
-
-        tourFlightPlan = tourFlightPlan.split('breakline')
-        del tourFlightPlan[-1]
-
-        index = 2
-        for fp in tourFlightPlan:
-                fpTemp = ''
-                f = list(fp)
-                if (str(f[0]) == ' '):
-                        fpTemp = fp.replace(' ' , '', 1) 
-                else:
-                        fpTemp = fp
-
-                fpTemp = fpTemp.replace('1' , str(index), 1) 
-                index += 1
-                text += str(fpTemp) + '\n'
-
-        text+=  str(index)+'       0       3       16      0.000000        0.000000        0.000000        0.000000        48.879025       2.367450        000.000000      1'
-
-        file = open("flightplan.mavlink", "w") 
-        file.write(text) 
-        file.close()
-        return text
-
 def calculateEnergyCost(p1,p2):
         # velocity in m/s
         velocidade = 15
@@ -178,9 +123,19 @@ def getMinimoEnergia(listaSites):
         for t in tours:
                 z = (' -> '.join([ a for a,b in t]+['0']))
 
+        route = []
+        for t in tours:
+                route = ([a for a,b in t]+['0'])
+
+        array = []
+        for r in route:
+                array.append(int(r))
+
+        print(array)
+
         print('Valor mínimo:' + str(value(prob.objective)))
 
-        return( z, value(prob.objective))
+        return( z, value(prob.objective), array)
 
 def getMaximoDeSensores(listaSites, autonomia):
         

@@ -175,6 +175,8 @@
               <option value="1">MILP</option>
               <option value="2">Tabu Search</option>
               <option value="3">Hybrid Genetic Algorithm</option>
+              <option value="4">All</option>
+
             </select>
             <div class="input-group-append">
               <button onclick="javascript: generateFlightPlan()" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
@@ -252,7 +254,8 @@
           url : 'http://127.0.0.1:5000/generateFlightPlan?algorithm='+ algorithm,
           type : 'GET',
           dataType:'json',
-          success : function(data) {              
+          success : function(data) {
+                          
             $('#result').html(data)
           },
           error : function(request,error){
