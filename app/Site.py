@@ -90,7 +90,6 @@ class Site():
         return self.isRouted
 
     def getNewPosicao(self):
-        print( 'Posicao dos pontos  : ' + self.id + ' ' + str(self.posicao[0]) + ' e '+ str(self.posicao[1]) + ' ' + str(self.posicao[2])  )
         utm_conversion = utm.from_latlon(self.posicao[0],self.posicao[1])
         newPosition = [0,0,0]
         newPosition[0] = utm_conversion[0]
@@ -111,22 +110,19 @@ class Site():
         return self.sensorType
 
     def get_distance_to(self, dest):
-        origin = (self.posicao[0], self.posicao[1])
-        destination = (dest.posicao[0], dest.posicao[1])
 
-        forward_key = origin + destination
-        backward_key = destination + origin
+        origin = (self.id)
+        destination = (dest.getId())
 
-        if forward_key in Site.__distances_table:
-            return Site.__distances_table[forward_key]
+        key = origin +'_'+ destination
 
-        if backward_key in Site.__distances_table:
-            return Site.__distances_table[backward_key]
+        if key in Site.__distances_table:
+            return Site.__distances_table[key]
 
         p1 = self.getNewPosicao()
         p2 = dest.getNewPosicao()
 
         dist = self.calculateEnergyCost(p1,p2)
-        Site.__distances_table[forward_key] = dist
+        Site.__distances_table[key] = dist
 
         return dist

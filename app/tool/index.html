@@ -113,80 +113,169 @@
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
 
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Random Simulation</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Manual</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <br>
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+              
+              <div class='row'>
+                <div class='col-md-6'>
+                  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                    </div>
+                  </div>
+                  <!--The div element for the map -->
+                  <div id="map_simulation"></div>
+
+                  <div id="currentDepotSimulation">Nothing yet...</div>
+
+                  <input type="hidden" value="" id="logDepot">
+                  <input type="hidden" value="" id="latDepot">
+
+                  <button onclick="javascript: changeDepot()" type="button" class="btn btn-secondary">Change Depot</button>
+
+                
+                </div>
+                <div class='col-md-6'>
+                  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Sensors List</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Sensor Type</th>
+                          <th>Amount</th>
+                          <th>Add to Flight Plan?</th>
+                          <th>Options</th>
+        
+                        </tr>
+                      </thead>
+                      <tbody id="sensorsList">
+                      
+                      </tbody>
+                    </table>
+                  </div>
+                
+
+                <button onclick="javascript: newPoints()" type="button" class="btn btn-secondary btn-lg">New Points</button>
+                </div>  
+              </div>
+
+
+              <br>
+
+              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h4 class="h4">Generate Flight Plan</h4>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                </div>
+              </div>
+
+              <div class="input-group">
+                <select class="custom-select" id="algorithm" name="algorithm">
+                  <option selected>Choose the Algorithm...</option>
+                  <option value="1">MILP</option>
+                  <option value="2">Tabu Search</option>
+                  <option value="3">Hybrid Genetic Algorithm</option>
+                  <option value="4">All</option>
+
+                </select>
+                <div class="input-group-append">
+                  <button onclick="javascript: generateFlightPlan()" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
+                </div>
+              </div>
+
+              <div class='bd-example' id='result'>
+              </div>
+
+            </div>
+              
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">                
+                <div class='row'>
+                  <div class='col-md-6'>
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                      <h1 class="h2">Dashboard</h1>
+                      <div class="btn-toolbar mb-2 mb-md-0">
+                      </div>
+                    </div>
+                    <!--The div element for the map -->
+                    <div id="map_manual"></div>
+                  
+                  </div>
+                  <div class='col-md-6'>
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                      <h1 class="h2">Sensors List</h1>
+                      <div class="btn-toolbar mb-2 mb-md-0">
+                      </div>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-striped table-sm">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Sensor Type</th>
+                            <th>Amount</th>
+                            <th>Add to Flight Plan?</th>
+                            <th>Options</th>
           
-          <div class='row'>
-            <div class='col-md-6'>
-              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                <h1 class="h2">Dashboard</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
+                          </tr>
+                        </thead>
+                        <tbody id="sensorsList">
+                        
+                        </tbody>
+                      </table>
+                    </div>
+                  
+  
+                  <button onclick="javascript: newPoints()" type="button" class="btn btn-secondary btn-lg">New Points</button>
+                  </div>  
                 </div>
-              </div>
-              <!--The div element for the map -->
-              <div id="map"></div>
-            
-            </div>
-            <div class='col-md-6'>
-              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                <h1 class="h2">Sensors List</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
+  
+  
+                <br>
+  
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                  <h4 class="h4">Generate Flight Plan</h4>
+                  <div class="btn-toolbar mb-2 mb-md-0">
+                  </div>
                 </div>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-striped table-sm">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Sensor Type</th>
-                      <th>Amount</th>
-                      <th>Add to Flight Plan?</th>
-                      <th>Options</th>
-    
-                    </tr>
-                  </thead>
-                  <tbody id="sensorsList">
-                   
-                  </tbody>
-                </table>
-              </div>
+  
+                <div class="input-group">
+                  <select class="custom-select" id="algorithm" name="algorithm">
+                    <option selected>Choose the Algorithm...</option>
+                    <option value="1">MILP</option>
+                    <option value="2">Tabu Search</option>
+                    <option value="3">Hybrid Genetic Algorithm</option>
+                    <option value="4">All</option>
+  
+                  </select>
+                  <div class="input-group-append">
+                    <button onclick="javascript: generateFlightPlan()" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
+                  </div>
+                </div>
+  
+                <div class='bd-example' id='result'>
+                </div>
+  
+                
+
+
+            </div>
             
-
-            <button onclick="javascript: newPoints()" type="button" class="btn btn-secondary btn-lg">New Points</button>
-            </div>  
           </div>
 
-
-
-          <br>
-
-         
-
-
-          <br>
-
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h4 class="h4">Generate Flight Plan</h4>
-            <div class="btn-toolbar mb-2 mb-md-0">
-            </div>
-          </div>
-
-          <div class="input-group">
-            <select class="custom-select" id="algorithm" name="algorithm">
-              <option selected>Choose the Algorithm...</option>
-              <option value="1">MILP</option>
-              <option value="2">Tabu Search</option>
-              <option value="3">Hybrid Genetic Algorithm</option>
-              <option value="4">All</option>
-
-            </select>
-            <div class="input-group-append">
-              <button onclick="javascript: generateFlightPlan()" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
-            </div>
-          </div>
-
-          <div class='bd-example' id='result'>
-          </div>
-
-          <input type="hidden" value="" id="locationSites">
+        
 
         </main>
       </div>
@@ -205,16 +294,6 @@
       feather.replace()
     </script>
 
-    <script>
-      // Initialize and add the map
-      function initMap() {
-        // The location of Uluru
-        var uluru = {lat: 48.879049, lng: 2.367448};
-        // The map, centered at Uluru
-        var map = new google.maps.Map(
-            document.getElementById('map'), {zoom: 10, center: uluru});
-      }
-    </script>
           <!--Load the API from the specified URL
           * The async attribute allows the browser to render the page while the API loads
           * The key parameter will contain your own API key (which is not needed for this tutorial)
@@ -244,6 +323,26 @@
 
       }
 
+      function changeDepot(){
+
+        var latitude = $('#latDepot').val()
+        var longitude = $('#logDepot').val()
+
+        $.ajax({
+          url : 'http://127.0.0.1:5000/set_depot?latitude='+ latitude + '&longitude='+  longitude ,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            location.reload()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }
+
       function generateFlightPlan(){
 
         var algorithm = $('select[name=algorithm]').val()
@@ -255,7 +354,6 @@
           type : 'GET',
           dataType:'json',
           success : function(data) {
-                          
             $('#result').html(data)
           },
           error : function(request,error){
@@ -299,36 +397,11 @@
         });
       }
 
-    
-      $.ajax({
-        url : 'http://127.0.0.1:5000/get_sensors',
-        type : 'GET',
-        dataType:'json',
-        success : function(data) {              
-          
-          var $body = $('#sensorsList')
-            $.each(data, function(i, item) {
-              var j = JSON.parse(item)
-              var $tr = $('<tr>').append(
-                    $('<td>').text(j.id),
-                    $('<td>').text(j.nome),
-                    $('<td>').text(j.quantidade),
-                    $('<td>').text(j.solicitado),
-                    $('<td>').html(' <a href="javascript:addSensorsToPlan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
-                      + ' <a href="javascript:removeSensorsFromPlan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
-
-                ); 
-
-              $body.append($tr)
-
-            });
-        },
-        error : function(request,error){
-          alert("Request: "+JSON.stringify(request));
-        }
-      });
-
       $( document ).ready(function() {
+
+        var map_simulation;
+        var map_manual;
+
         $.ajax({
           url : 'http://127.0.0.1:5000/get_sites',
           type : 'GET',
@@ -361,18 +434,41 @@
             console.log(logt)
             
             mapOptions = {
-                zoom: 15,
-                center: {lat: 48.879049, lng: 2.367448}
+                zoom: 22,
+                mapTypeId: 'satellite',
+                center: {lat: lat[0], lng: logt[0]}
             }
-              
-            map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-            for (i = 0; i < lat.length; i++) { 
+            map_simulation = new google.maps.Map(document.getElementById("map_simulation"), mapOptions);
+            map_manual = new google.maps.Map(document.getElementById("map_manual"), mapOptions);
+
+
+            var zero = new google.maps.Marker({
+                position: new google.maps.LatLng(lat[0], logt[0]),
+                draggable: true,
+                label: ' 0',
+                map: map_simulation
+
+            });
+
+            google.maps.event.addListener(zero, 'dragend', function (evt) {
+                document.getElementById('currentDepotSimulation').innerHTML = '<p>Marker dropped: Current Lat: '
+                 + evt.latLng.lat().toFixed(6) + ' Current Lng: ' + evt.latLng.lng().toFixed(6) + '</p>';
+                 $('#latDepot').val(evt.latLng.lat().toFixed(6));
+                 $('#logDepot').val(evt.latLng.lng().toFixed(6));
+            });
+
+            google.maps.event.addListener(zero, 'dragstart', function (evt) {
+                document.getElementById('currentDepotSimulation').innerHTML = '<p>Currently dragging marker...</p>';
+            });
+
+
+            for (i = 1; i < lat.length; i++) { 
 
               marker = new google.maps.Marker({
                 position: new google.maps.LatLng(lat[i], logt[i]),
                 label: ''+ id [i],
-                map: map
+                map: map_simulation
               });
 
               addInfoWindow(marker, 'Altitude:'+alt[i]+' <br>'+'Tipo do sensor:'+sensorType[i])
@@ -384,6 +480,36 @@
 
           }
         });
+
+
+        $.ajax({
+          url : 'http://127.0.0.1:5000/get_sensors',
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            
+            var $body = $('#sensorsList')
+              $.each(data, function(i, item) {
+                var j = JSON.parse(item)
+                var $tr = $('<tr>').append(
+                      $('<td>').text(j.id),
+                      $('<td>').text(j.nome),
+                      $('<td>').text(j.quantidade),
+                      $('<td>').text(j.solicitado),
+                      $('<td>').html(' <a href="javascript:addSensorsToPlan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
+                        + ' <a href="javascript:removeSensorsFromPlan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
+
+                  ); 
+
+                $body.append($tr)
+
+              });
+          },
+          error : function(request,error){
+            alert("Request: "+JSON.stringify(request));
+          }
+        });
+
       });
 
       function addInfoWindow(marker, message) {
@@ -393,7 +519,7 @@
         });
 
         google.maps.event.addListener(marker, 'click', function () {
-            infoWindow.open(map, marker);
+            infoWindow.open(map_simulation, marker);
         });
       }
 

@@ -86,10 +86,11 @@ def getMinimoEnergia(listaSites):
 
         energy_costs = dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
 
-        #for i in sites:
-        #    for j in sites:
-        #        if i!=j:
-                   # print('Custo energético entre '+ i+' e '+ j+' :'+ str(energy_costs[(i,j)]))
+        for i in sites:
+            for j in sites:
+                if i!=j:
+                        print('Custo energético entre '+ i+' e '+ j+' :'+ str(energy_costs[(i,j)]))
+        
         K = 1 
         prob=LpProblem("vehicle",LpMinimize)
 

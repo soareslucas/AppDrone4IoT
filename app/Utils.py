@@ -1,3 +1,9 @@
+import random
+import sys
+import math
+import os
+import numpy as np
+import Site as Site
 
 
 def get_line_flight_plan(sites, id):
@@ -50,3 +56,20 @@ def generate_file_flight_plan(tours, listaSites, file_name):
         file = open(file_name+".mavlink", "w") 
         file.write(text) 
         file.close()
+
+
+def generate_random_data(lat, lon, num_rows,idSite, idSensor):
+    sitesTemp = []
+    for _ in range(num_rows):
+        dec_lat = random.random()/1000
+        dec_lon = random.random()/1000
+        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,5)) , "false", idSensor)
+        idSite += 1
+        sitesTemp.append(site)
+    return sitesTemp
+
+def generate_file_data():
+        global textFile
+        file = open("flightplan.txt", "w") 
+        file.write(textFile) 
+        return file
