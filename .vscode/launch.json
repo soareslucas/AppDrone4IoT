@@ -8,7 +8,7 @@
             "name": "Python: File",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/WebService.py"
+            "program": "${workspaceFolder}/app/WebService.py"
         }
     ]
 }

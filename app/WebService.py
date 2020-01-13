@@ -30,8 +30,8 @@ dadosColetados = []
 listaSensores = []
 listaSites = []
 
-latitude = 48.879049
-longitude = 2.367448
+latitude = 41.176877
+longitude = -8.604733
 textFile = ''
 # Autonomia em J |||  (59940 - 1500 mAh - 11.1V )   (99900 - 2500 mAh - 11.1V ) (159840 - 4000 mAh - 11.1V )
 autonomy = 59940
@@ -293,8 +293,8 @@ def new_points():
     listaSensores.append(sensor)
 
     idSite = int(idSite) + 1
-    sitesList = util.generate_random_data(latitude, longitude, 100, int(idSite), 4)
-    sensor = Sensor.Sensor(4,"lixeira",100, sitesList)
+    sitesList = util.generate_random_data(latitude, longitude, 10, int(idSite), 4)
+    sensor = Sensor.Sensor(4,"lixeira",10, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     listaSensores.append(sensor)  
