@@ -31,8 +31,6 @@ listaSensores = []
 listaSites = []
 
 
-
-
 #latitude = 41.176877
 #longitude = -8.604733
 
