@@ -25,12 +25,30 @@ def get_line_flight_plan(sites, id):
                         +'       ' + lon[:8] +'        '+height+'.000000      1breakline')
 
 def generate_file_flight_plan(tours, listaSites, file_name):
-        text = ('GC WPL 110\n'
-        + '0       1       0       0       0       0       0       0       0       0       0       1\n')
-        
+        text = ('GC WPL 120\n')
+
         tourFlightPlan = ''
-        for t in tours:
+
+        _temp = tours[:(len(tours) - 1)]
+        for t in _temp:
                 tourFlightPlan += str(get_line_flight_plan(listaSites, t)) 
+
+        
+        last = listaSites[0]
+        coordinates = last.getPosicao()
+        lat = str(coordinates[0])
+        lon = str(coordinates[1])
+        height = str(coordinates[2])
+        digits = len(height)
+        
+        if (digits == 1):
+                height = '00'+height
+        if (digits == 2):
+                height = '0'+height
+
+        tourFlightPlan += ('1       0       3       21      0.000000        '
+        + '0.000000        0.000000        0.000000        ' + lat[:9] 
+        +'       ' + lon[:8] +'        '+height+'.000000      1breakline')
 
         tourFlightPlan = tourFlightPlan.replace(']', '')
         tourFlightPlan = tourFlightPlan.replace('[', '')
@@ -40,7 +58,7 @@ def generate_file_flight_plan(tours, listaSites, file_name):
         tourFlightPlan = tourFlightPlan.split('breakline')
         del tourFlightPlan[-1]
 
-        index = 1
+        index = 0
         for fp in tourFlightPlan:
                 fpTemp = ''
                 f = list(fp)
@@ -61,9 +79,9 @@ def generate_file_flight_plan(tours, listaSites, file_name):
 def generate_random_data(lat, lon, num_rows,idSite, idSensor):
     sitesTemp = []
     for _ in range(num_rows):
-        dec_lat = random.random()/10000
-        dec_lon = random.random()/10000
-        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,5)) , "false", idSensor)
+        dec_lat = random.random()/3000
+        dec_lon = random.random()/3000
+        site = Site.Site(str(idSite), (         lat+dec_lat, lon+dec_lon, np.random.randint(1,5)) , "false", idSensor)
         idSite += 1
         sitesTemp.append(site)
     return sitesTemp

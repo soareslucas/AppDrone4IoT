@@ -35,9 +35,10 @@ listaSites = []
 
 #latitude = 41.176877
 #longitude = -8.604733
-
-latitude = 48.879026
-longitude = 2.367448
+latitude = 41.287083
+longitude = -8.639556
+#latitude = 48.879026
+#longitude = 2.367448
 
 textFile = ''
 # Autonomia em J |||  (59940 - 1500 mAh - 11.1V )   (99900 - 2500 mAh - 11.1V ) (159840 - 4000 mAh - 11.1V )
