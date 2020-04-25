@@ -19,7 +19,7 @@ ax.scatter(Xyz[ : , 0], Xyz[ :, 1], Xyz[ :, 2], s = 50, c = "b")
 
 print(Xyz); 
 
-clustering = AgglomerativeClustering(affinity='euclidean', compute_full_tree='auto', connectivity=None, distance_threshold=569, linkage='ward', memory=None, n_clusters=None, pooling_func='deprecated')
+clustering = AgglomerativeClustering(affinity='euclidean', compute_full_tree='auto', connectivity=None, distance_threshold=569, linkage='ward', memory=None, n_clusters=None)
 
 clustering.fit(Xyz)
 

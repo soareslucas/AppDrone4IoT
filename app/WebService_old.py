@@ -12,8 +12,6 @@ import numpy as np
 import Otimizacao as otim
 import Sensor as Sensor
 import Site as Site
-import SensorType as SensorType
-
 import TabuSearch as tabu
 import HybridAlgorithm as ha
 import Utils as util
@@ -31,20 +29,6 @@ listaAppsCadastradas = []
 dadosColetados = []
 listaSensores = []
 listaSites = []
-listaTypes = []
-listaSitesManual = []
-
-
-
-sensorType = SensorType.SensorType( 1,"PhSolo")
-listaTypes.append(sensorType)
-sensorType = SensorType.SensorType( 2,"Umidade")
-listaTypes.append(sensorType)
-sensorType = SensorType.SensorType( 3,"Temperatura")
-listaTypes.append(sensorType)
-sensorType = SensorType.SensorType( 4,"Lixeira")
-listaTypes.append(sensorType)
-
 
 
 #latitude = 41.176877
@@ -74,96 +58,6 @@ def get_sites():
     for l in listaSites:
         _tmp +=  [l.toJSON()]
     return Response(json.dumps(_tmp),  mimetype='application/json')
-
-@app.route("/get_sites_manual")
-def get_sites_manual():
-    global listaSitesManual
-
-    _tmp = []
-    for l in listaSitesManual:
-        _tmp +=  [l.toJSON()]
-    return Response(json.dumps(_tmp),  mimetype='application/json')
-
-@app.route("/get_types")
-def get_types():
-    global listaTypes
-
-    _tmp = []
-    for l in listaTypes:
-        _tmp +=  [l.toJSON()]
-    return Response(json.dumps(_tmp),  mimetype='application/json')
-
-
-@app.route("/add_type", methods=['GET'])
-def add_type():
-    #nomeApp = request.args.get('nomeApp')
-    global listaTypes
-    typeName = request.args.get('type')
-
-
-    if(len(listaTypes) == 0):
-        index = 1
-    else:
-        lastType =  listaTypes[-1]
-        index = int(lastType.getId())+1
-
-
-    sensorType = SensorType.SensorType( index,typeName)
-    listaTypes.append(sensorType)
-
-    return Response(json.dumps('ok'),  mimetype='application/json')
-
-
-
-@app.route("/add_sensor", methods=['GET'])
-def add_sensor():
-    global listaSitesManual
-    global listaTypes
-
-    typeName = ""
-
-    latManual = request.args.get('latitude')
-    longManual = request.args.get('longitude')    
-    typeID = request.args.get('sensorType')
-
-    print(typeID)
-
-    for y in listaTypes:
-        if str(y.getId()) == typeID:
-            typeName = y.type
-
-    if(len(listaSitesManual) == 0):
-        index = 1
-    else:
-        lastType =  listaSitesManual[-1]
-        index = int(lastType.getId())+1
-
-    
-    siteManual = Site.Site(str(index), (latManual, longManual, 0) , "false", typeID)
-    listaSitesManual.append(siteManual)
-
-    return Response(json.dumps('ok'),  mimetype='application/json')
-
-
-
-
-@app.route("/remove_type", methods=['GET'])
-def remove_type():
-    idType = request.args.get('id')
-    global listaTypes
-
-    _temp = []
-    _temp = listaTypes.copy()
-
-    for y in listaTypes:
-        if str(y.getId()) == idType:
-            _temp.remove(y)
-
-    listaTypes = _temp.copy()
-
-    return Response(json.dumps('ok'),  mimetype='application/json')
-
-
 
 @app.route("/get_sensors")
 def get_sensors():
@@ -233,6 +127,14 @@ def plan_flight():
         results += '  '+ str(result[1])
         util.generate_file_flight_plan(result[2], listaSites, 'milp_flightplan')
 
+
+        """         percentual = (float(min_energy)/autonomy) * 100
+        results = ('O uso da autonomia para visitar todos os sensores está em  ' 
+        + str(percentual) + '% <br>'
+        + 'o gasto mínimo de energia é: ' + str(min_energy) + ' <br>'
+        + 'Estatísticas para realização do voo: <br>' 
+        + otim.getMaximoDeSensores(listaSites, autonomy) )  """
+
     if algorithm == '2':
         dict_of_neighbours = tabu.generate_neighbours(listaSites)
         first = tabu.generate_first_solution(dict_of_neighbours)
@@ -244,6 +146,7 @@ def plan_flight():
         route.append(0)
 
         util.generate_file_flight_plan(result[0], listaSites, 'tabu_flightplan')
+
 
         results += '  '+ str(result[1])
 
@@ -266,7 +169,6 @@ def plan_flight():
         results = route
         results += '  '+ str(result.travel_cost)
 
-    #all
     if algorithm == '4':
 
         # MILP
@@ -370,8 +272,6 @@ def new_points():
 
     global listaSensores
     global listaSites
-    global listaTypes
-
     
     site = Site.Site(str(0), (latitude, longitude, 0) , "false", 0)
     listaSites = [site]
@@ -379,28 +279,28 @@ def new_points():
     idSite = 1
 
     sitesList = util.generate_random_data(latitude, longitude, 5, idSite, 1)
-    sensor = Sensor.Sensor(1,listaTypes[0],5, sitesList)
+    sensor = Sensor.Sensor(1,"umidade",5, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     listaSensores = [sensor]
 
     idSite = int(idSite) + 1
     sitesList = util.generate_random_data(latitude, longitude, 15, int(idSite), 2)
-    sensor = Sensor.Sensor( 2,listaTypes[1],15, sitesList)
+    sensor = Sensor.Sensor( 2,"temperatura",15, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     listaSensores.append(sensor)
 
     idSite = int(idSite) + 1
     sitesList = util.generate_random_data(latitude, longitude, 25, int(idSite), 3)
-    sensor = Sensor.Sensor( 3,listaTypes[2],25,sitesList)
+    sensor = Sensor.Sensor( 3,"phSolo",25,sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     listaSensores.append(sensor)
 
     idSite = int(idSite) + 1
     sitesList = util.generate_random_data(latitude, longitude, 10, int(idSite), 4)
-    sensor = Sensor.Sensor(4,listaTypes[3],10, sitesList)
+    sensor = Sensor.Sensor(4,"lixeira",10, sitesList)
     lastSite = sitesList[len(sitesList) -1]
     idSite = lastSite.getId()
     listaSensores.append(sensor)  

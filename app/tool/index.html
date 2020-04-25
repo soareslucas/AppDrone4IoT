@@ -45,7 +45,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="sensor.html">
                   <span data-feather="radio"></span>
                     Sensors
                 </a>
@@ -169,7 +169,7 @@
                   </div>
                 
 
-                <button onclick="javascript: newPoints()" type="button" class="btn btn-secondary btn-lg">New Points</button>
+                  <button onclick="javascript: newPoints()" type="button" class="btn btn-secondary btn-lg">New Points</button>
                 </div>  
               </div>
 
@@ -205,12 +205,13 @@
                 <div class='row'>
                   <div class='col-md-6'>
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                      <h1 class="h2">Dashboard</h1>
+                      <h1 class="h2">Locations</h1>
                       <div class="btn-toolbar mb-2 mb-md-0">
                       </div>
                     </div>
                     <!--The div element for the map -->
                     <div id="map_manual"></div>
+
                   
                   </div>
                   <div class='col-md-6'>
@@ -224,21 +225,57 @@
                         <thead>
                           <tr>
                             <th>#</th>
+                            <th>Location</th>
+                            <th>Added to the Flight Plan?</th>
                             <th>Sensor Type</th>
-                            <th>Amount</th>
-                            <th>Add to Flight Plan?</th>
+                            <th>Active?</th>
+
                             <th>Options</th>
           
                           </tr>
                         </thead>
-                        <tbody id="sensorsList">
+                        <tbody id="sensorsListManual">
                         
                         </tbody>
                       </table>
+
+                      <button onclick="javascript: addPoint()" type="button" class="btn btn-secondary btn-lg">New Point</button>
+
                     </div>
                   
-  
-                  <button onclick="javascript: newPoints()" type="button" class="btn btn-secondary btn-lg">New Points</button>
+                    <br>
+
+
+                    <div style="display:none" id="sensorNew">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                          <h1 class="h2">New Sensor</h1>
+                          <div class="btn-toolbar mb-2 mb-md-0">
+                          </div>
+                        </div>
+
+
+                        <div class="form-group">
+                          <select class="custom-select" id="sensorType" name="sensorType">
+                            <option selected>Choose the type of sensor...</option>
+          
+                          </select>
+                        </div>
+
+
+
+                        <div  class="form-group">
+
+                          <div id="currentDepotManual">Nothing yet...</div>
+                          <input type="text" value="" id="logDepotManual">
+                          <input type="text" value="" id="latDepotManual">
+                        </div>
+
+
+
+
+                        <button onclick="javascript: sendNewPoint()" type="button" class="btn btn-secondary btn-lg">Add Point</button>
+
+                    </div>
                   </div>  
                 </div>
   
@@ -252,7 +289,7 @@
                 </div>
   
                 <div class="input-group">
-                  <select class="custom-select" id="algorithm" name="algorithm">
+                  <select class="custom-select" id="algorithmManual" name="algorithmManual">
                     <option selected>Choose the Algorithm...</option>
                     <option value="1">MILP</option>
                     <option value="2">Tabu Search</option>
@@ -265,7 +302,7 @@
                   </div>
                 </div>
   
-                <div class='bd-example' id='result'>
+                <div class='bd-example' id='resultManual'>
                 </div>
   
                 
@@ -305,6 +342,136 @@
 
 
     <script> 
+    
+    function loadSitesManual(){
+
+
+        $.ajax({
+            url : 'http://127.0.0.1:5000/get_sites_manual',
+            type : 'GET',
+            dataType:'json',
+            success : function(data) {              
+              
+              var $body = $('#sensorsListManual')
+                $.each(data, function(i, item) {
+                  var j = JSON.parse(item)
+                  var $tr = $('<tr>').append(
+                        $('<td>').text(j.id),
+                        $('<td>').text(j.posicao),
+                        $('<td>').text(j.isRouted),
+                          $('<td>').text(j.sensorType),
+
+                        $('<td>').html(' <a href="javascript:editType('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
+                          + ' <a href="javascript:removeType('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
+
+                    ); 
+
+                  $body.append($tr)
+
+                });
+            },
+            error : function(request,error){
+              alert("Request: "+JSON.stringify(request));
+            }
+          });
+
+
+        }
+
+
+
+    function loadTypes(){
+
+
+        $.ajax({
+            url : 'http://127.0.0.1:5000/get_types',
+            type : 'GET',
+            dataType:'json',
+            success : function(data) {              
+              
+              var $select = $('#sensorType')
+                $.each(data, function(i, item) {
+                  var j = JSON.parse(item)
+                  var $option =  $('<option>').html("<option value='"+j.id+"' selected>"+j.type+"</option>")
+
+                          
+                  $select.append($option)
+
+                });
+            },
+            error : function(request,error){
+              alert("Request: "+JSON.stringify(request));
+            }
+          });
+
+
+      }
+
+      function sendNewPoint(){
+
+
+        var latitude = $('#latDepotManual').val()
+        var longitude = $('#logDepotManual').val()
+        var sensorType = $('#sensorType').val()
+
+
+
+        $.ajax({
+            url : 'http://127.0.0.1:5000/add_sensor?latitude='+ latitude + '&longitude='+  longitude+'&sensorType='+sensorType,
+            type : 'GET',
+            dataType:'json',
+            success : function(data) {          
+              location.reload()
+
+            },
+            error : function(request,error){
+              alert("Request: "+JSON.stringify(request));
+            }
+          });
+
+
+      }
+
+    function addPoint(){
+
+
+
+      $("#sensorNew").css('display', 'block');
+
+      var mapOptions;
+
+      mapOptions = {
+          zoom: 22,
+          mapTypeId: 'satellite',
+          center: {lat: 41.287083, lng: -8.639556}
+      }
+
+
+      map_manual = new google.maps.Map(document.getElementById("map_manual"), mapOptions);
+
+      var zero = new google.maps.Marker({
+          position: new google.maps.LatLng(41.287083, -8.639556),
+          draggable: true,
+          label: ' 0',
+          map: map_manual
+
+      });
+
+      google.maps.event.addListener(zero, 'dragend', function (evt) {
+          document.getElementById('currentDepotManual').innerHTML = '<p>Marker dropped: Current Lat: '
+          + evt.latLng.lat().toFixed(6) + ' Current Lng: ' + evt.latLng.lng().toFixed(6) + '</p>';
+          $('#latDepotManual').val(evt.latLng.lat().toFixed(6));
+          $('#logDepotManual').val(evt.latLng.lng().toFixed(6));
+      });
+
+      google.maps.event.addListener(zero, 'dragstart', function (evt) {
+          document.getElementById('currentDepotManual').innerHTML = '<p>Currently dragging marker...</p>';
+      });
+
+
+
+      }
+
 
       function newPoints(){
 
@@ -369,7 +536,7 @@
           url : 'http://127.0.0.1:5000/addSensors?tipoSensor='+sensorType,
           type : 'GET',
           dataType:'json',
-          success : function(data) {              
+          success : function(data) {
             console.log(data)
             location.reload()
           },
@@ -472,7 +639,10 @@
               });
 
               addInfoWindow(marker, 'Altitude:'+alt[i]+' <br>'+'Tipo do sensor:'+sensorType[i])
+
             }
+
+
           },
           error : function(request,error){
             alert("Request: "+JSON.stringify(request));
@@ -491,9 +661,10 @@
             var $body = $('#sensorsList')
               $.each(data, function(i, item) {
                 var j = JSON.parse(item)
+
                 var $tr = $('<tr>').append(
                       $('<td>').text(j.id),
-                      $('<td>').text(j.nome),
+                      $('<td>').text(j.nome.type),
                       $('<td>').text(j.quantidade),
                       $('<td>').text(j.solicitado),
                       $('<td>').html(' <a href="javascript:addSensorsToPlan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
@@ -509,6 +680,10 @@
             alert("Request: "+JSON.stringify(request));
           }
         });
+
+
+        loadTypes()
+        loadSitesManual()
 
       });
 

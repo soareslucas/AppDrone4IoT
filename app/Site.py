@@ -14,10 +14,11 @@ class Site():
 
     __distances_table = {}  
 
-    def __init__(self, id, posicao, isRouted, sensorType):
+    def __init__(self, id, posicao, isRouted, sensorType, active):
         self.id = id
         self.posicao = posicao
         self.isRouted = isRouted
+        self.active = active
         self.sensorType = sensorType
      #   self.demand = demand
 
@@ -76,6 +77,12 @@ class Site():
 
     def getId(self):
         return self.id
+
+    def setId(self, active):
+        self.active = active
+
+    def getId(self):
+        return self.active
         
     def setPosicao(self, posicao):
         self.posicao = posicao
