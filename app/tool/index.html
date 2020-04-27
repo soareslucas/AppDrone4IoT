@@ -368,7 +368,42 @@
 
     <script> 
 
-    
+      function add_sensors_plan(id){
+        $.ajax({
+          url : 'http://127.0.0.1:5000/add_sensors_plan?id='+id,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {
+            loadSensorsManual()
+            loadSitesManual()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }  
+
+
+      function remove_sensors_plan(id){
+        $.ajax({
+          url : 'http://127.0.0.1:5000/remove_sensors_plan?id='+id,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {
+            loadSensorsManual()
+            loadSitesManual()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }  
+
+
     function loadSensorsManual(){
 
       $.ajax({
@@ -387,8 +422,8 @@
                       $('<td>').text(j.nome),
                       $('<td>').text(j.quantidade),
                       $('<td>').text(j.solicitado),
-                      $('<td>').html(' <a href="javascript:addSensorsToPlan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
-                        + ' <a href="javascript:removeSensorsFromPlan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
+                      $('<td>').html(' <a href="javascript:add_sensors_plan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
+                        + ' <a href="javascript:remove_sensors_plan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
 
                   ); 
 
@@ -404,7 +439,6 @@
     }
     
     function loadSitesManual(){
-
 
         $.ajax({
             url : 'http://127.0.0.1:5000/get_sites_manual',
@@ -505,7 +539,6 @@
 
       function sendNewPoint(){
 
-
         var latitude = $('#latDepotManual').val()
         var longitude = $('#logDepotManual').val()
         var sensorType = $('#sensorType').val()
@@ -533,8 +566,6 @@
       }
 
     function addPoint(){
-
-
 
       $("#sensorNew").css('display', 'block');
 

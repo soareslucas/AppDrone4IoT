@@ -114,10 +114,49 @@ def change_site_plan():
     return Response(json.dumps("ok"),  mimetype='application/json')
 
 
-@app.route("/change_site_plan")
+@app.route("/add_sensors_plan")
 def add_sensors_plan():
-    global listaSitesManual
 
+    id = request.args.get('id')
+
+    print(id)
+    
+    global listSensorsManual
+
+    for idx, item in enumerate(listSensorsManual):
+        if str(item.getId()) == id:
+            sites = item.getSites()
+            for index, x in enumerate(sites):
+                x.setRouted(True)
+                sites[index] = x
+            print(idx)
+            item.setSites(sites)
+            item.setSolicitado(True)
+            listSensorsManual[idx] = item
+
+    return Response(json.dumps('ok'),  mimetype='application/json')
+
+@app.route("/remove_sensors_plan")
+def remove_sensors_plan():
+
+    id = request.args.get('id')
+
+    print(id)
+    
+    global listSensorsManual
+
+    for idx, item in enumerate(listSensorsManual):
+        if str(item.getId()) == id:
+            sites = item.getSites()
+            for index, x in enumerate(sites):
+                x.setRouted(False)
+                sites[index] = x
+            print(idx)
+            item.setSites(sites)
+            item.setSolicitado(False)
+            listSensorsManual[idx] = item
+
+    return Response(json.dumps('ok'),  mimetype='application/json')
 
 @app.route("/get_sites_manual")
 def get_sites_manual():
@@ -190,12 +229,15 @@ def add_sensor():
         if ( item.getNome() == typeSensor ):
             index = idx
 
+
     print(index)
+
+    idx = len(listSensorsManual)
 
     if (index == ""):
         listaSites = []
         listaSites.append(siteManual)
-        sensor = Sensor.Sensor( 1,typeSensor,1,listaSites)
+        sensor = Sensor.Sensor( idx + 1 ,typeSensor,1,listaSites)
         listSensorsManual.append(sensor)
     else:
         listaSites = []
@@ -208,9 +250,7 @@ def add_sensor():
 
 
     return Response(json.dumps('ok'),  mimetype='application/json')
-
-
-
+    
 
 @app.route("/remove_type", methods=['GET'])
 def remove_type():
@@ -255,8 +295,7 @@ def set_depot():
     location = []
 
     latitude = float(request.args.get('latitude'))
-    longitude = float(request.args.get('longitude'))
-
+    longitude = float(request.args.get('longitude')) 
     listaSites[0].setPosicao((latitude, longitude, 0))
 
     return Response(json.dumps('ok'),  mimetype='application/json')
