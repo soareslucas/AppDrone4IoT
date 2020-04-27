@@ -216,7 +216,7 @@
                   </div>
                   <div class='col-md-6'>
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                      <h1 class="h2">Sensors List</h1>
+                      <h1 class="h2">Sites List</h1>
                       <div class="btn-toolbar mb-2 mb-md-0">
                       </div>
                     </div>
@@ -270,12 +270,37 @@
                           <input type="text" value="" id="latDepotManual">
                         </div>
 
-
-
-
                         <button onclick="javascript: sendNewPoint()" type="button" class="btn btn-secondary btn-lg">Add Point</button>
 
                     </div>
+
+
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                      <h1 class="h2">Sensors Group List</h1>
+                      <div class="btn-toolbar mb-2 mb-md-0">
+                      </div>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-striped table-sm">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Sensor Type</th>
+                            <th>Amount</th>
+                            <th>Add to Flight Plan?</th>
+                            <th>Options</th>
+          
+                          </tr>
+                        </thead>
+                        <tbody id="groupList">
+                        
+                        </tbody>
+                      </table>
+                    </div>
+
+
+
+
                   </div>  
                 </div>
   
@@ -342,6 +367,41 @@
 
 
     <script> 
+
+    
+    function loadSensorsManual(){
+
+      $.ajax({
+          url : 'http://127.0.0.1:5000/get_sensors_manual',
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            
+            var $body = $('#groupList')
+            $body.html('')
+            $.each(data, function(i, item) {
+                var j = JSON.parse(item)
+
+                var $tr = $('<tr>').append(
+                      $('<td>').text(j.id),
+                      $('<td>').text(j.nome),
+                      $('<td>').text(j.quantidade),
+                      $('<td>').text(j.solicitado),
+                      $('<td>').html(' <a href="javascript:addSensorsToPlan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
+                        + ' <a href="javascript:removeSensorsFromPlan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
+
+                  ); 
+
+                $body.append($tr)
+
+              });
+          },
+          error : function(request,error){
+            alert("Request: "+JSON.stringify(request));
+          }
+        });
+
+    }
     
     function loadSitesManual(){
 
@@ -353,22 +413,39 @@
             success : function(data) {              
               
               var $body = $('#sensorsListManual')
-                $.each(data, function(i, item) {
-                  var j = JSON.parse(item)
-                  var $tr = $('<tr>').append(
-                        $('<td>').text(j.id),
-                        $('<td>').text(j.posicao),
-                        $('<td>').text(j.isRouted),
-                          $('<td>').text(j.sensorType),
 
-                        $('<td>').html(' <a href="javascript:editType('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
-                          + ' <a href="javascript:removeType('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
+              $body.html('')
 
-                    ); 
+              $.each(data, function(i, item) {
+                var j = JSON.parse(item)
+                var buttons =  ""
+                var service = "change_active"
+                
+                if(j.active == false){
+                  buttons = ' <a href="javascript:change('+j.id+', '+'1'+')"  > <span > <i title="Turn on"  class="fa fa-toggle-off" aria-hidden="true"></i>'
+                }else{
+                  buttons = ' <a href="javascript:change('+j.id+', '+'1'+')"  > <span > <i title="Turn off" class="fa fa-toggle-on" aria-hidden="true"></i>'
+                }
 
-                  $body.append($tr)
+                if(j.routed == false){
+                  buttons += ' <a href="javascript:change('+j.id+', 2)"  > <span > <i title="Add to Plan" class="fas fa-plus-circle"></i> </span> </a>'
+                }else{
+                  buttons += ' <a href="javascript:change('+j.id+', 2)"  > <span > <i title="Remove from Plan" class="fas fa-minus-circle" aria-hidden="true"></i>'
+                }
 
-                });
+                var $tr = $('<tr>').append(
+                      $('<td>').text(j.id),
+                      $('<td>').text(j.posicao),
+                      $('<td>').text(j.routed),
+                      $('<td>').text(j.sensorType),
+                      $('<td>').text(j.active),
+                      $('<td>').html(buttons)
+
+                ); 
+
+                $body.append($tr)
+
+              });
             },
             error : function(request,error){
               alert("Request: "+JSON.stringify(request));
@@ -378,7 +455,26 @@
 
         }
 
+    function change(id, service){
 
+      if (service == "1"){
+        var serv = "change_active"
+      }else{
+        var serv = "change_site_plan"
+      }
+
+      $.ajax({
+        url : 'http://127.0.0.1:5000/'+serv+'?id='+id,
+        type : 'GET',
+        dataType:'json',
+        success : function(data) {              
+          loadSitesManual()
+        },
+        error : function(request,error){
+          alert("Request: "+JSON.stringify(request));
+        }
+      });
+    }
 
     function loadTypes(){
 
@@ -414,14 +510,18 @@
         var longitude = $('#logDepotManual').val()
         var sensorType = $('#sensorType').val()
 
-
-
         $.ajax({
             url : 'http://127.0.0.1:5000/add_sensor?latitude='+ latitude + '&longitude='+  longitude+'&sensorType='+sensorType,
             type : 'GET',
             dataType:'json',
             success : function(data) {          
-              location.reload()
+              loadSitesManual()
+              loadSensorsManual()
+
+              $("#sensorNew").css('display', 'none');
+              $('#latDepotManual').val('')
+              $('#logDepotManual').val('')
+              $('#sensorType').val('')
 
             },
             error : function(request,error){
@@ -684,6 +784,7 @@
 
         loadTypes()
         loadSitesManual()
+        loadSensorsManual()
 
       });
 

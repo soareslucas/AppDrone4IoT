@@ -14,10 +14,10 @@ class Site():
 
     __distances_table = {}  
 
-    def __init__(self, id, posicao, isRouted, sensorType, active):
+    def __init__(self, id, posicao, routed, sensorType, active):
         self.id = id
         self.posicao = posicao
-        self.isRouted = isRouted
+        self.routed = routed
         self.active = active
         self.sensorType = sensorType
      #   self.demand = demand
@@ -78,10 +78,10 @@ class Site():
     def getId(self):
         return self.id
 
-    def setId(self, active):
+    def setActive(self, active):
         self.active = active
 
-    def getId(self):
+    def getActive(self):
         return self.active
         
     def setPosicao(self, posicao):
@@ -90,11 +90,11 @@ class Site():
     def getPosicao(self):
         return self.posicao
     
-    def setIsRouted(self, isRouted):
-        self.isRouted = isRouted
+    def setRouted(self, routed):
+        self.routed = routed
 
     def isRouted(self):
-        return self.isRouted
+        return self.routed
 
     def getNewPosicao(self):
         utm_conversion = utm.from_latlon(self.posicao[0],self.posicao[1])

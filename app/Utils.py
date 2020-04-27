@@ -81,7 +81,7 @@ def generate_random_data(lat, lon, num_rows,idSite, idSensor):
     for _ in range(num_rows):
         dec_lat = random.random()/10000
         dec_lon = random.random()/10000
-        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,2)) , "false", idSensor)
+        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,2)) , False, idSensor, False)
         idSite += 1
         sitesTemp.append(site)
     return sitesTemp

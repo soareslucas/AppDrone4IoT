@@ -33,6 +33,7 @@ listaSensores = []
 listaSites = []
 listaTypes = []
 listaSitesManual = []
+listSensorsManual = []
 
 
 
@@ -75,6 +76,49 @@ def get_sites():
         _tmp +=  [l.toJSON()]
     return Response(json.dumps(_tmp),  mimetype='application/json')
 
+
+@app.route("/change_active")
+def change_active():
+    global listaSitesManual
+
+    id = request.args.get('id')
+
+
+    for idx, item in enumerate(listaSitesManual):
+        if str(item.getId()) == id:
+            if(item.getActive() == False):
+                item.setActive(True)
+            else:
+                item.setActive(False)
+            listaSitesManual[idx] = item
+        print(listaSitesManual[idx].getActive())
+
+
+    return Response(json.dumps("ok"),  mimetype='application/json')
+
+@app.route("/change_site_plan")
+def change_site_plan():
+    global listaSitesManual
+
+    id = request.args.get('id')
+
+
+    for idx, item in enumerate(listaSitesManual):
+        if str(item.getId()) == id:
+            if(item.isRouted() == False):
+                item.setRouted(True)
+            else:
+                item.setRouted(False)
+            listaSitesManual[idx] = item
+
+    return Response(json.dumps("ok"),  mimetype='application/json')
+
+
+@app.route("/change_site_plan")
+def add_sensors_plan():
+    global listaSitesManual
+
+
 @app.route("/get_sites_manual")
 def get_sites_manual():
     global listaSitesManual
@@ -96,7 +140,6 @@ def get_types():
 
 @app.route("/add_type", methods=['GET'])
 def add_type():
-    #nomeApp = request.args.get('nomeApp')
     global listaTypes
     typeName = request.args.get('type')
 
@@ -118,19 +161,15 @@ def add_type():
 @app.route("/add_sensor", methods=['GET'])
 def add_sensor():
     global listaSitesManual
+    global listSensorsManual
     global listaTypes
 
     typeName = ""
-
     latManual = request.args.get('latitude')
     longManual = request.args.get('longitude')    
-    typeID = request.args.get('sensorType')
+    typeSensor = request.args.get('sensorType')
 
-    print(typeID)
-
-    for y in listaTypes:
-        if str(y.getId()) == typeID:
-            typeName = y.type
+    print(typeSensor)
 
     if(len(listaSitesManual) == 0):
         index = 1
@@ -138,9 +177,35 @@ def add_sensor():
         lastType =  listaSitesManual[-1]
         index = int(lastType.getId())+1
 
-    
-    siteManual = Site.Site(str(index), (latManual, longManual, 0) , "false", typeID)
+    siteManual = Site.Site(str(index), (latManual, longManual, 0) , False, typeSensor, False)
     listaSitesManual.append(siteManual)
+
+    
+    index = ""
+    for idx, item in enumerate(listSensorsManual):
+        print(item.getNome())
+        print(typeSensor)
+        print(idx)
+        print(item.getNome() == typeSensor)
+        if ( item.getNome() == typeSensor ):
+            index = idx
+
+    print(index)
+
+    if (index == ""):
+        listaSites = []
+        listaSites.append(siteManual)
+        sensor = Sensor.Sensor( 1,typeSensor,1,listaSites)
+        listSensorsManual.append(sensor)
+    else:
+        listaSites = []
+        sensor = listSensorsManual[index]
+        listaSites = sensor.getSites()
+        listaSites.append(siteManual)
+        sensor.setQuantidade(len(listaSites))
+        sensor.setSites(listaSites)
+        listSensorsManual[index] = sensor
+
 
     return Response(json.dumps('ok'),  mimetype='application/json')
 
@@ -163,6 +228,15 @@ def remove_type():
 
     return Response(json.dumps('ok'),  mimetype='application/json')
 
+
+@app.route("/get_sensors_manual")
+def get_sensors_manual():
+    global listSensorsManual
+
+    _tmp = []
+    for l in listSensorsManual:
+        _tmp +=  [l.toJSON()]
+    return Response(json.dumps(_tmp),  mimetype='application/json')
 
 
 @app.route("/get_sensors")
@@ -290,6 +364,7 @@ def plan_flight():
         for g in genes:
             route += '-> ' + g.getId()
 
+
         results += route
         results += '  '+ str(result.travel_cost)
 
@@ -301,6 +376,7 @@ def subscribe_for_sensors_data():
     #nomeApp = request.args.get('nomeApp')
     tipoSensor = request.args.get('tipoSensor')
     #isCadastrado = False   
+
 
     for x in listaSensores:
         if x.getId() == int(tipoSensor):
@@ -317,15 +393,6 @@ def subscribe_for_sensors_data():
                     listaSites.append(y)
     
     return Response(json.dumps('ok'),  mimetype='application/json')
-
-"""     for x in listaAppsCadastradas:
-        if nomeApp == x:
-            isCadastrado = True
-                
-    if isCadastrado == False:
-        return( 'Você precisa cadastrar a aplicação' 
-        + 'antes de solicitar dados de sensores!')
-    else: """
 
 @app.route("/removeSensors", methods=['GET'])
 def unsubscribe_sensors():
@@ -373,7 +440,7 @@ def new_points():
     global listaTypes
 
     
-    site = Site.Site(str(0), (latitude, longitude, 0) , "false", 0)
+    site = Site.Site(str(0), (latitude, longitude, 0) , False, 0, False)
     listaSites = [site]
 
     idSite = 1
