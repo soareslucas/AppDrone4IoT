@@ -192,7 +192,7 @@
 
                 </select>
                 <div class="input-group-append">
-                  <button onclick="javascript: generateFlightPlan()" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
+                  <button onclick="javascript: generateFlightPlan('false')" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
                 </div>
               </div>
 
@@ -323,7 +323,7 @@
   
                   </select>
                   <div class="input-group-append">
-                    <button onclick="javascript: generateFlightPlan()" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
+                    <button onclick="javascript: generateFlightPlan('true')" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
                   </div>
                 </div>
   
@@ -641,18 +641,27 @@
 
       }
 
-      function generateFlightPlan(){
+      function generateFlightPlan(manual){
 
-        var algorithm = $('select[name=algorithm]').val()
+        if(manual == 'true'){
+          var algorithm = $('select[name=algorithmManual]').val()
+        }else{
+          var algorithm = $('select[name=algorithm]').val()
+        }
 
         $('#result').html('<div class="spinner-border"> </div>') 
 
         $.ajax({
-          url : 'http://127.0.0.1:5000/generateFlightPlan?algorithm='+ algorithm,
+          url : 'http://127.0.0.1:5000/generateFlightPlan?algorithm='+ algorithm+'&manual='+manual,
           type : 'GET',
           dataType:'json',
           success : function(data) {
-            $('#result').html(data)
+            if(manual == "true"){
+              $('#resultManual').html(data)
+            }else{
+              $('#result').html(data)
+            }
+            
           },
           error : function(request,error){
             console.log(JSON.stringify(request))

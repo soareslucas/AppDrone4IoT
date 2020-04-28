@@ -162,6 +162,11 @@ def remove_sensors_plan():
 def get_sites_manual():
     global listaSitesManual
 
+    if len (listaSitesManual) == 0:
+        site = Site.Site(str(0), (latitude, longitude, 0) , False, 0, False)
+        listaSitesManual = [site]
+
+
     _tmp = []
     for l in listaSitesManual:
         _tmp +=  [l.toJSON()]
@@ -210,7 +215,7 @@ def add_sensor():
 
     print(typeSensor)
 
-    if(len(listaSitesManual) == 0):
+    if(len(listaSitesManual) == 1):
         index = 1
     else:
         lastType =  listaSitesManual[-1]
@@ -337,31 +342,49 @@ def create_app():
 
 @app.route("/generateFlightPlan", methods=['GET'])
 def plan_flight():
+
+    global listaSites
     algorithm = request.args.get('algorithm')
 
+    manual = request.args.get('manual')
+    
+    listaSitesPlan = []
+
+    if (manual == "true"):
+        for x in listaSitesManual:
+            if x.getActive() == True and x.isRouted() == True:
+                listaSitesPlan.append(x)
+    else:
+        listaSitesPlan = listaSites.copy()
+
+
+    for y in listaSitesPlan:
+        print(y.getId())
+
+
     if algorithm == '1':
-        result = otim.getMinimoEnergia(listaSites)
+        result = otim.getMinimoEnergia(listaSitesPlan)
 
         results = str(result[0])
         results += '  '+ str(result[1])
-        util.generate_file_flight_plan(result[2], listaSites, 'milp_flightplan')
+        util.generate_file_flight_plan(result[2], listaSitesPlan, 'milp_flightplan')
 
     if algorithm == '2':
-        dict_of_neighbours = tabu.generate_neighbours(listaSites)
+        dict_of_neighbours = tabu.generate_neighbours(listaSitesPlan)
         first = tabu.generate_first_solution(dict_of_neighbours)
-        result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSites)*10)
+        result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSitesPlan)*10)
         results = str(result[0])
 
         route = []
         route = result[0]
         route.append(0)
 
-        util.generate_file_flight_plan(result[0], listaSites, 'tabu_flightplan')
+        util.generate_file_flight_plan(result[0], listaSitesPlan, 'tabu_flightplan')
 
         results += '  '+ str(result[1])
 
     if algorithm == '3':
-        individual = ha.run_ga(listaSites, 500, 20, 50, 0.02, verbose=1)
+        individual = ha.run_ga(listaSitesPlan, 500, 20, 50, 0.02, verbose=1)
         result = individual['route']
         genes = result.genes
         
@@ -373,7 +396,7 @@ def plan_flight():
             route_list.append(int(genes[g].getId()))
         
         route_list.append(0)
-        util.generate_file_flight_plan(route_list, listaSites, 'hybrid_flightplan')
+        util.generate_file_flight_plan(route_list, listaSitesPlan, 'hybrid_flightplan')
 
 
         results = route
@@ -383,19 +406,19 @@ def plan_flight():
     if algorithm == '4':
 
         # MILP
-        result = otim.getMinimoEnergia(listaSites)
+        result = otim.getMinimoEnergia(listaSitesPlan)
         results = str(result[0])
         results += '  '+ str(result[1])
 
         # Tabu
-        dict_of_neighbours = tabu.generate_neighbours(listaSites)
+        dict_of_neighbours = tabu.generate_neighbours(listaSitesPlan)
         first = tabu.generate_first_solution(dict_of_neighbours)
-        result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSites)*10)
+        result = tabu.tabu_search(first[0], first[1], dict_of_neighbours, 5, len(listaSitesPlan)*10)
         results += str(result[0])
         results += ' '+ str(result[1])
 
         # Hybrid
-        individual = ha.run_ga(listaSites, 500, 20, 50, 0.02, verbose=1)
+        individual = ha.run_ga(listaSitesPlan, 500, 20, 50, 0.02, verbose=1)
         result = individual['route']
         genes = result.genes
         route = ''

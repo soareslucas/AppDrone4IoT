@@ -97,7 +97,7 @@ class Site():
         return self.routed
 
     def getNewPosicao(self):
-        utm_conversion = utm.from_latlon(self.posicao[0],self.posicao[1])
+        utm_conversion = utm.from_latlon(float(self.posicao[0]),float(self.posicao[1]))
         newPosition = [0,0,0]
         newPosition[0] = utm_conversion[0]
         newPosition[1] = utm_conversion[1]
