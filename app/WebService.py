@@ -37,13 +37,13 @@ listSensorsManual = []
 
 
 
-sensorType = SensorType.SensorType( 1,"PhSolo")
+sensorType = SensorType.SensorType( 1,"Ph")
 listaTypes.append(sensorType)
 sensorType = SensorType.SensorType( 2,"Umidade")
 listaTypes.append(sensorType)
 sensorType = SensorType.SensorType( 3,"Temperatura")
 listaTypes.append(sensorType)
-sensorType = SensorType.SensorType( 4,"Lixeira")
+sensorType = SensorType.SensorType( 4,"NPK")
 listaTypes.append(sensorType)
 
 
