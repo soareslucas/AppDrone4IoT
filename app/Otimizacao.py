@@ -10,24 +10,66 @@ import numpy as np
 import random
 #from mpl_toolkits import mplot3d
 import Site as Site
+import Vehicle as Vehicle
+import itertools
 
+from mpl_toolkits import mplot3d
+from mpl_toolkits.mplot3d import proj3d
+from mpl_toolkits.mplot3d.proj3d import proj_transform
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+from matplotlib.text import Annotation
+from matplotlib.patches import FancyArrowPatch
+
+import matplotlib.pyplot as plt
+
+import numpy as np
+
+
+
+import math
 import utm
-
+rnd = np.random
 
 minimoEnergia = 0
+
+class Annotation3D(Annotation):
+    def __init__(self, text, xyz, *args, **kwargs):
+        super().__init__(text, xy=(0,0), *args, **kwargs)
+        self._xyz = xyz
+
+    def draw(self, renderer):
+        x2, y2, z2 = proj_transform(*self._xyz, renderer.M)
+        self.xy=(x2,y2)
+        super().draw(renderer)
+
+
+def _annotate3D(ax,text, xyz, *args, **kwargs):
+    '''Add anotation `text` to an `Axes3d` instance.'''
+
+    annotation= Annotation3D(text, xyz, *args, **kwargs)
+    ax.add_artist(annotation)
+
+
+
+
+
+class Arrow3D(FancyArrowPatch):
+
+    def __init__(self, xs, ys, zs, *args, **kwargs):
+        FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
+        self._verts3d = xs, ys, zs
+
+    def draw(self, renderer):
+        xs3d, ys3d, zs3d = self._verts3d
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+        FancyArrowPatch.draw(self, renderer)
 
 def getValueMinimoEnergia():
         global minimoEnergia
         return(minimoEnergia)
 
-def get_next_site(parent, non_zero_edges):
-        '''helper function to get the next edge'''
-        edges = [e for e in non_zero_edges if e[0]==parent]
-        for e in edges:
-                non_zero_edges.remove(e)
-        return edges
-
-def calculateEnergyCost(p1,p2):
+def calculateEnergyCost(p1,p2,veh):
         # velocity in m/s
         velocidade = 15
         # kg/m^-3
@@ -42,6 +84,13 @@ def calculateEnergyCost(p1,p2):
         Cd = 0.0225
         # Frontal Area of the UAV  (m2) 
         frontalArea = 0.07992
+
+
+        """         powerHovering = np.sqrt(W/2*rho) * np.sqrt(w/ np.power(W,2) * 3,14)
+                energyHovering = powerHovering x timeHovering
+
+        """
+
 
         energy = 0
         d = np.sqrt( (p1[0]-p2[0])**2+ (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2)
@@ -76,181 +125,389 @@ def calculateEnergyCost(p1,p2):
         energy = (d / velocidade) * (Pv + Ph)
         return(energy)
 
-def getMinimoEnergia(listaSites):
-    
+
+def get_next_site(parent, non_zero_edges):
+
+        edges = [e for e in non_zero_edges if e[0]==parent]
+        for e in edges:
+                non_zero_edges.remove(e)
+        return edges
+
+
+
+def get_next_site_cv(parent, non_zero_edges):
+
+        print(non_zero_edges)
+        edges = []
+        for e in non_zero_edges:
+                if(parent == e[0]):
+                        edges.append(e)
+
+        for e in edges:
+                non_zero_edges.remove(e)
+        return edges
+
+
+
+def getMax(listaSites, vehicles):
+
+        # Autonomia em J |||  (59940 - 1500 mAh - 11.1V )   (99900 - 2500 mAh - 11.1V ) (159840 - 4000 mAh - 11.1V )
+        autonomy = [30000, 30000]
+        customer_count = len(listaSites)
+        vehicle_count = len(vehicles)
+        
+        # BLE
+        # 50 to 100m
+        # 1Mb/s 
+        
+        q = dict( (a.getId(), a.getBuffer() ) for a in listaSites )
+
+        q = []
+        for k in range(customer_count):
+                q.append(listaSites[k].getBuffer())
+        
+        Q = []
+        for k in range(vehicle_count):
+                Q.append(vehicles[k].getCapacity())
+
+        hover = [0]
+        W = 19
+        rho = 1.225
+        a = float(W/2*rho)
+        b =  float ( W/ math.pow(W,2) *  (3.14))
+
+        print(a)
+        print(b)
+        powerHovering = (math.sqrt(a) * math.sqrt(b) )
+        
+        for k in range(customer_count):
+                sec = listaSites[k].getBuffer()
+                energy =  powerHovering * sec
+                hover.append(energy)
+
+        
+        
+
+        index = 0
         sites = []
         for site in listaSites:
-            sites.append(site.getId())
+            site.setIdArray(index)
+            sites.append(site)
+            index += 1
 
-        positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
+       # positions = dict( (int(a.getIdArray()), a.getNewPosicao() ) for a in listaSites )
 
-        energy_costs = dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
+        positions = dict( (int(a.getIdArray()), a.getPosicao() ) for a in listaSites )
 
-        for i in sites:
-            for j in sites:
-                if i!=j:
-                        print('Custo energético entre '+ i+' e '+ j+' :'+ str(energy_costs[(i,j)]))
-        
-        K = 1 
-        prob=LpProblem("vehicle",LpMinimize)
 
-        x = LpVariable.dicts('x',energy_costs, 0,1,LpBinary)
-        u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
+        energy_costs = np.zeros((customer_count, customer_count, vehicle_count))
 
-        cost = (lpSum([  x[(i,j)]  * energy_costs[(i,j)]for (i,j) in energy_costs ]))
-        prob+=cost
-
-        for k in sites:
-            prob+= lpSum([ x[(i,k)] for i in sites if (i,k) in x]) ==1
-            prob+=lpSum([ x[(k,i)] for i in sites if (k,i) in x]) ==1
-
-        N=len(sites)/K
-        for i in sites:
-                for j in sites:
-                        if i != j and (i != '0' and j!= '0') and (i,j) in x:
-                                prob += u[i] - u[j] <= (N)*(1-x[(i,j)]) - 1
-
-        prob.solve()
-
-        non_zero_edges = [ e for e in x if value(x[e]) != 0 ]
-        tours = get_next_site('0', non_zero_edges)
-        tours = [ [e] for e in tours ]
-
-        for t in tours:
-                while t[-1][1] !='0':
-                        t.append(get_next_site(t[-1][1], non_zero_edges)[-1])
-
-        z = ''
-        for t in tours:
-                z = (' -> '.join([ a for a,b in t]+['0']))
-
-        route = []
-        for t in tours:
-                route = ([a for a,b in t]+['0'])
-
-        array = []
-        for r in route:
-                array.append(int(r))
-
-        print(array)
-
-        print('Valor mínimo:' + str(value(prob.objective)))
-
-        return( z, value(prob.objective), array)
-
-def getMaximoDeSensores(listaSites, autonomia):
-        
-        sites = []
-        for site in listaSites:
-            sites.append(site.getId())
-
-        positions = dict( (a.getId(), a.getNewPosicao() ) for a in listaSites )
-        energy_costs=dict( ((s1,s2), calculateEnergyCost(positions[s1],positions[s2])) for s1 in positions for s2 in positions if s1!=s2)
-
-        #the number of sales people 
-        K = 1 
+        for k in range(vehicle_count):
+                for j in range(customer_count):
+                        for i in range(customer_count):
+                                energy_costs[i][j][k] = calculateEnergyCost(positions[i], positions[j], vehicles[k])
+                                print('Custo energético entre '+ str(i)+' e '+ str(j)+' no veículo ' + str(k) +' :'+ str( energy_costs[i][j][k] ) )
+                                energy_costs[i][j][k] += hover[i]
+                                print('Custo energético entre '+ str(i)+' e '+ str(j)+' no veículo ' + str(k) +' :'+ str( energy_costs[i][j][k] ) )
+                
 
         prob=LpProblem("vehicle",LpMaximize)
+        x = [[[LpVariable("x%s_%s,%s"%(i,j,k), cat="Binary") if i != j else None for k in range(vehicle_count)]for j in range(customer_count)] for i in range(customer_count)]
 
-        x = LpVariable.dicts('x',energy_costs, 0,1,LpBinary)
-
-        #dummy vars to eliminate subtours
-        u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
-
-        cost = (lpSum([x[(i,j)] for (i,j) in x]))
-        prob+=cost      
-
-        for k in sites:
-                prob+= lpSum([ x[(i,k)] for i in sites if (i,k) in x]) == lpSum([ x[(k,i)] for i in sites if (k,i) in x])
-        
-        for k in sites:
-                prob+= lpSum([ x[('0',k)] for k in sites if ('0',k) in x]) == 1
-        
-        for k in sites:
-                prob+= lpSum([ x[(k,'0')] for k in sites if (k, '0') in x]) == 1
-
-        prob+= lpSum([  x[(i,j)]  * energy_costs[(i,j)]for (i,j) in energy_costs ]) <= autonomia
-
-        
-        #subtour elimination
-        N=len(sites)/K
-        for i in sites:
-                for j in sites:
-                        if i != j and (i != '0' and j!= '0') and (i,j) in x:
-                                prob += u[i] - u[j] <= (N)*(1-x[(i,j)]) - 1
-
-        prob.solve()                
-        
-        total_energy_cost = 0
-        for i in sites:
-            for j in sites:
-                if i != j :
-                    total_energy_cost += value(x[(i,j)])  * energy_costs[(i,j)]
-        
-
-        maxSensores = value(prob.objective)
-        global minimoEnergia
-        minimoEnergia = getMinimoEnergiaComMaxSensores(maxSensores, energy_costs, listaSites)
-            
-        return('O maximo de sensores é: ' 
-        + str(maxSensores-1) 
-        +' <br> O custo inicial para realização do voo seria: '
-        + str(total_energy_cost)
-        +' <br> O mínimo de custo alcançado é: '
-        +str(minimoEnergia))
-    
-
-
-def getMinimoEnergiaComMaxSensores(maxSensores, energy_costs, listaSites):
-
-        sites = []
-                
-        for site in listaSites:
-            sites.append(site.getId())
-         
-        #create the problme
-        prob=LpProblem("vehicle",LpMinimize)
-        #indicator variable if site i is connected to site j in the tour
-        x = LpVariable.dicts('x',energy_costs, 0,1,LpBinary)
-        #dummy vars to eliminate subtours
-        u = LpVariable.dicts('u', sites, 0, len(sites)-1, LpInteger)
-        #the objective
-        cost =  ( lpSum([  x[(i,j)]  * energy_costs[(i,j)]for (i,j) in energy_costs ])) 
+        #objective function
+        cost = lpSum(x[i][j][k] if i != j else 0
+                          for k in range(vehicle_count) 
+                          for j in range(customer_count) 
+                          for i in range (customer_count) ) 
         prob+=cost
 
-        for k in sites:
-                prob+= lpSum([ x[(i,k)] for i in sites if (i,k) in x]) == lpSum([ x[(k,i)] for i in sites if (k,i) in x])
-        
-        for k in sites:
-                prob+= lpSum([ x[('0',k)] for k in sites if ('0',k) in x]) == 1
-        
-        for k in sites:
-                prob+= lpSum([ x[(k,'0')] for k in sites if (k, '0') in x]) == 1
-        
-        prob+= lpSum([x[(i,j)] for (i,j) in x]) == maxSensores
-        
-        #subtour elimination
-        N=len(sites)/1
-        for i in sites:
-                for j in sites:
-                        if i != j and (i != '0' and j!= '0') and (i,j) in x:
-                                prob += u[i] - u[j] <= (N)*(1-x[(i,j)]) - 1
+        for k in range(vehicle_count):
+                for i in range(customer_count):
+                        prob += lpSum(x[i][j][k] if i != j else 0  for j in range( customer_count) ) == lpSum(x[j][i][k]  if i != j else 0  for j in range(customer_count) )
+
+
+        for i in range(1,customer_count):
+                prob += lpSum(x[i][j][k] if i != j else 0  for j in range(customer_count)  for k in range(vehicle_count) ) <= 1
+                prob +=  lpSum(x[j][i][k]  if i != j else 0  for j in range(customer_count)  for k in range(vehicle_count)  ) <= 1
+
+
+
+        for k in range(vehicle_count):
+                prob += lpSum(x[0][i][k]  for i in range(customer_count) ) == 1
+                prob += lpSum(x[i][0][k]  for i in range(customer_count)  ) == 1
+
+
+        for i in range(customer_count):
+                        prob += lpSum(x[0][i][k] for k in range(vehicle_count) ) <= 1
+                        prob += lpSum(x[i][0][k]   for k in range(vehicle_count) ) <= 1
+
+        for k in range(vehicle_count):
+                prob += lpSum([ q[j] * x[i][j][k] if i != j else 0 for i in range(customer_count) for j in range (1,customer_count) ]) <= Q[k] 
+
+        for k in range(vehicle_count):
+                prob += lpSum([ energy_costs[i][j][k] * x[i][j][k] if i != j else 0 for i in range(customer_count) for j in range (1,customer_count) ]) <= autonomy[k] 
+
+
+        subtours = []
+        for i in range(2,customer_count):
+                subtours += itertools.combinations(range(1,customer_count), i)
+
+        for s in subtours:
+                prob += lpSum(x[i][j][k] if i !=j else 0 for i, j in itertools.permutations(s,2) for k in range(vehicle_count)) <= len(s) - 1
+
 
         prob.solve()
 
-        non_zero_edges = [ e for e in x if value(x[e]) != 0 ]
-        tours = get_next_site('0', non_zero_edges)
+        print('Máximo de sensores: ' + str(value(prob.objective)))
+        print('Total capacidade armazenamento drone: ' + str(Q[0] + Q[1]) )
+        
+        totalSync = 0        
+        for i in range(customer_count):
+                for j in range(customer_count):
+                        for k in range(vehicle_count):
+                                if i != j:
+                                        totalSync += q[j] * value(x[i][j][k])
+
+        print('Total sincronizado: '+ str(totalSync))
+
+
+
+        normalEnergy = 0        
+        for i in range(customer_count):
+                for j in range(customer_count):
+                        for k in range(vehicle_count):
+                                if i != j:
+                                        normalEnergy += energy_costs[i][j][k] * value(x[i][j][k])
+
+        print('Total gasto energértico: '+ str(normalEnergy))
+
+
+        totalSensorsV1 = 0
+        totalSensorsV2 = 0
+        totalSyncV1 = 0
+        totalSyncV2 = 0
+
+        for k in range(vehicle_count):
+                for i in range(customer_count):
+                        for j in range(customer_count):
+                                if ( (i != j) and value(x[i][j][k]) == 1):
+                                        if k == 0:
+                                                totalSyncV1 += q[j] * value(x[i][j][k])
+                                                totalSensorsV1 += 1
+                                        else:
+                                                totalSyncV2 += q[j] * value(x[i][j][k])
+                                                totalSensorsV2 += 1
+                                                        
+
+
+
+        non_zero_edges = []
+        for i in range(customer_count):
+                for j in range(customer_count):
+                        for k in range(vehicle_count):
+                                if ( (i != j) and  value( x[i][j][k]) != 0 ):
+                                        a = [i,j,k]
+                                        non_zero_edges.append(a)
+
+
+        for n in non_zero_edges:
+                print (n)
+        
+
+        tours = get_next_site_cv(0, non_zero_edges)
         tours = [ [e] for e in tours ]
 
         for t in tours:
-                while t[-1][1] !='0':
-                        t.append(get_next_site(t[-1][1], non_zero_edges)[-1])
+                while t[-1][1] != 0:
+                        t.append(get_next_site_cv(t[-1][1], non_zero_edges)[-1])
 
-        z = ''
         for t in tours:
-                z = (' -> '.join([ a for a,b in t]+['0']))
+                print(' -> '.join(str([ a for a,b,c in t]+[0]) ))
 
 
-        generate_file_flight_plan(tours, listaSites)
+        maxSensors = value(prob.objective)
         
-        return value(prob.objective)
+        res = getMinimoEnergiaComMaxSensores(vehicles, maxSensors, energy_costs, listaSites, positions)
+
+        minEnergy = res[0]
+        totalSyncMinEnergy = res[1]
+
+        totalStorageV1 = Q[0]
+        totalStorageV2 = Q[1]
+        totalStorage = Q[0] + Q[1]
+
+        return maxSensors-2, normalEnergy, totalSensorsV1-1, totalSensorsV2-1, totalStorage , totalStorageV1, totalStorageV2, totalSync, totalSyncV1, totalSyncV2, minEnergy, totalSyncMinEnergy
+    
+
+
+def getMinimoEnergiaComMaxSensores(vehicles, maxSensores, energy_costs, listaSites, positions):
+
+        autonomy = [30000, 30000]
+        customer_count = len(listaSites)
+        vehicle_count = len(vehicles)
+
+        q = []
+        for k in range(customer_count):
+                q.append(listaSites[k].getBuffer())
+        
+        Q = []
+        for k in range(vehicle_count):
+                Q.append(vehicles[k].getCapacity())
+                
+
+        prob=LpProblem("vehicle",LpMinimize)
+        x = [[[LpVariable("x%s_%s,%s"%(i,j,k), cat="Binary") if i != j else None for k in range(vehicle_count)]for j in range(customer_count)] for i in range(customer_count)]
+
+
+        #objective function
+        cost = lpSum(energy_costs[i][j][k] * x[i][j][k] if i != j else 0
+                          for k in range(vehicle_count) 
+                          for j in range(customer_count) 
+                          for i in range (customer_count) ) 
+        prob+=cost
+
+        for k in range(vehicle_count):
+                for i in range(customer_count):
+                        prob += lpSum(x[i][j][k] if i != j else 0  for j in range( customer_count) ) == lpSum(x[j][i][k]  if i != j else 0  for j in range(customer_count) )
+
+
+        for i in range(1,customer_count):
+                prob += lpSum(x[i][j][k] if i != j else 0  for j in range(customer_count)  for k in range(vehicle_count) ) <= 1
+                prob +=  lpSum(x[j][i][k]  if i != j else 0  for j in range(customer_count)  for k in range(vehicle_count)  ) <= 1
+
+
+        for k in range(vehicle_count):
+                prob += lpSum(x[0][i][k]  for i in range(customer_count) ) == 1
+                prob += lpSum(x[i][0][k]  for i in range(customer_count)  ) == 1
+                
+
+        for i in range(customer_count):
+                        prob += lpSum(x[0][i][k] for k in range(vehicle_count) ) <= 1
+                        prob += lpSum(x[i][0][k]   for k in range(vehicle_count) ) <= 1
+
+
+    
+        for k in range(vehicle_count):
+                prob += lpSum([ q[j] * x[i][j][k] if i != j else 0 for i in range(customer_count) for j in range (1,customer_count) ]) <= Q[k] 
+
+        for k in range(vehicle_count):
+                prob += lpSum([ energy_costs[i][j][k] * x[i][j][k] if i != j else 0 for i in range(customer_count) for j in range (1,customer_count) ]) <= autonomy[k] 
+
+        
+        prob+= lpSum( x[i][j][k] if i != j else 0
+                          for k in range(vehicle_count) 
+                          for j in range(customer_count) 
+                          for i in range (customer_count) ) == maxSensores
+
+        subtours = []
+        for i in range(2,customer_count):
+                subtours += itertools.combinations(range(1,customer_count), i)
+
+        for s in subtours:
+                prob += lpSum(x[i][j][k] if i !=j else 0 for i, j in itertools.permutations(s,2) for k in range(vehicle_count)) <= len(s) - 1
+
+
+
+        prob.solve()
+
+        
+        totalSync = 0
+        
+        for i in range(customer_count):
+                for j in range(customer_count):
+                        for k in range(vehicle_count):
+                                if i != j:
+                                        totalSync += q[j] * value(x[i][j][k])
+
+        print('Total sincronizado: '+ str(totalSync))
+
+        non_zero_edges = []
+        for i in range(customer_count):
+                for j in range(customer_count):
+                        for k in range(vehicle_count):
+                                if ( (i != j) and  value( x[i][j][k]) != 0 ):
+                                        a = [i,j,k]
+                                        non_zero_edges.append(a)
+
+
+        tours = get_next_site_cv(0, non_zero_edges)
+        tours = [ [e] for e in tours ]
+
+        for t in tours:
+                while t[-1][1] != 0:
+                        t.append(get_next_site_cv(t[-1][1], non_zero_edges)[-1])
+
+        for t in tours:
+                print(' -> '.join(str([ a for a,b,c in t]+[0]) ))
+
+
+
+
+
+
+        """         array = []
+
+                for r in route:
+                        array.append(int(r))
+
+                print(array) """
+        
+       
+
+        fig = plt.figure()
+        
+        ax = fig.add_subplot(111, projection='3d')
+
+
+        for i in range(customer_count):    
+                a =  positions[i]
+                if i == 0:
+                        ax.scatter(a[0], a[1], a[2], c='green', marker='o')
+                        #plt.text(a[0], a[1], "depot", fontsize=12)
+                else:
+                        ax.scatter(a[0], a[1], a[2], c='yellow', marker='o')
+                        #plt.text(a[0], a[1], str(sites[i].getId()), fontsize=12)
+
+
+        
+
+        vehicleTour = tours[0]
+        for vt in vehicleTour:
+                A = positions[vt[0]]
+                B = positions[vt[1]]
+
+                a = Arrow3D([A[0], B[0]], [A[1], B[1]], [A[2], B[2]], mutation_scale=20, lw=1, arrowstyle="-|>", color="k")
+                
+                text = str(vt[0]) 
+
+                _annotate3D(ax ,text, (A[0], A[1], A[2]), xytext=(3,3),textcoords='offset points')
+
+
+                ax.add_artist(a)
+
+        vehicleTour = tours[1]
+        for vt in vehicleTour:
+                A = positions[vt[0]]
+                B = positions[vt[1]]
+
+                a = Arrow3D([A[0], B[0]], [A[1], B[1]], [A[2], B[2]], mutation_scale=20, lw=1, arrowstyle="-|>", color="g")
+                
+                text = str(vt[0]) 
+                _annotate3D(ax,text, (A[0], A[1], A[2]), xytext=(3,3),textcoords='offset points')
+
+
+                ax.add_artist(a)
+
+
+
+
+        ax.set_xlabel('X Label')
+        ax.set_ylabel('Y Label')
+        ax.set_zlabel('Z Label')
+
+        plt.show()
+
+
+
+ 
+        return( value(prob.objective), totalSync)

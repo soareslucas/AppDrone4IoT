@@ -7,6 +7,7 @@ import json
 
 class Vehicle():
     def __init__(self, capacity):
+        self.id = 0
         self.routes = []
         self.capacity = capacity
         self.total_energy_spent = 0
@@ -19,3 +20,15 @@ class Vehicle():
 
     def check_if_fits(self, energy_cost):
         return total_energy_spent + energy_cost <= capacity
+
+    def getCapacity(self):
+        return self.capacity
+    
+    def setCapacity(self, capacity):
+        self.capacity = capacity
+
+    def getId(self):
+        return self.id
+    
+    def setId(self, id):
+        self.id = id

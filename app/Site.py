@@ -14,12 +14,15 @@ class Site():
 
     __distances_table = {}  
 
-    def __init__(self, id, posicao, routed, sensorType, active):
+    def __init__(self, id, posicao, routed, sensorType, active, buffer):
         self.id = id
         self.posicao = posicao
         self.routed = routed
         self.active = active
         self.sensorType = sensorType
+        self.buffer = buffer
+        self.idArray = 0
+
      #   self.demand = demand
 
     def calculateEnergyCost(self,p1,p2):
@@ -68,7 +71,7 @@ class Site():
                 if( (p1[2]-p2[2] ) < 0 ):
                         Pv = ( (W/2) * Vv) + ( (W/2) * np.sqrt( np.power(Vv, 2) + (  (2*W)/ (rho *3.14* np.power(R,2) ) ) ) )
 
-        energy = (d / velocidade) * (Pv + Ph)
+        energy = (d / velocidade) * (Pv + Ph)  
 
         return(energy)
 
@@ -92,6 +95,12 @@ class Site():
     
     def setRouted(self, routed):
         self.routed = routed
+    
+    def setBuffer(self, buffer):
+        self.buffer = buffer
+
+    def getBuffer(self):
+        return self.buffer
 
     def isRouted(self):
         return self.routed
@@ -133,3 +142,9 @@ class Site():
         Site.__distances_table[key] = dist
 
         return dist
+
+    def setIdArray(self, idArray):
+        self.idArray= idArray
+
+    def getIdArray(self):
+        return self.idArray

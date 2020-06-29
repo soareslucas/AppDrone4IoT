@@ -1,0 +1,886 @@
+ 
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="assets/img/favicons/favicon.ico">
+
+    <title>Dashboard Flight Plan</title>
+
+    <link rel="canonical" href="#">
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="dashboard.css" rel="stylesheet">
+
+    <script src="https://kit.fontawesome.com/30f0ec8f89.js" crossorigin="anonymous"></script>
+
+  </head>
+
+  <body>
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Drones Flight Plan</a>
+      <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+      <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+          <a class="nav-link" href="#">Sign out</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+          <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link active" href="#">
+                  <span data-feather="home"></span>
+                  Dashboard <span class="sr-only">(current)</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="sensor.html">
+                  <span data-feather="radio"></span>
+                    Sensors
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="file"></span>
+                  Flight Plans
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="watch"></span>
+                  Schedule
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="bar-chart-2"></span>
+                  Reports
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="layers"></span>
+                  Integrations
+                </a>
+              </li>
+            </ul>
+
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Saved Flight Plans</span>
+              <a class="d-flex align-items-center text-muted" href="#">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="file-text"></span>
+                  Humidity/December
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="file-text"></span>
+                  All/November
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="file-text"></span>
+                  Temperature/October
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="file-text"></span>
+                  pH/September
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Random Simulation</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Manual</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <br>
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+              
+              <div class='row'>
+                <div class='col-md-6'>
+                  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Locations</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                    </div>
+                  </div>
+                  <!--The div element for the map -->
+                  <div id="map_simulation"></div>
+
+
+                
+                </div>
+                <div class='col-md-6'>
+
+
+                  <div class="form-group">
+
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                      <div class="col-md-7">
+                        <h1 class="h2">Sensors List</h1>
+                      </div>
+                      <div class="col-md-4">
+                        <button onclick="javascript: newPoints()" type="button" class="btn btn-secondary btn-lg">New Random Points</button>
+
+                      </div>
+                      
+
+                      <div class="btn-toolbar mb-2 mb-md-0">
+                      </div>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-striped table-sm">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Sensor Type</th>
+                            <th>Amount</th>
+                            <th>Add to Flight Plan?</th>
+                            <th>Options</th>
+          
+                          </tr>
+                        </thead>
+                        <tbody id="sensorsList">
+                        
+                        </tbody>
+                      </table>
+                    </div>
+                  
+  
+
+                  </div> 
+
+
+                  <div class="form-group">
+
+                    <div id="currentDepotSimulation">Nothing yet...</div>
+
+                    <input type="text" value="" id="logDepot">
+                    <input type="text" value="" id="latDepot">
+  
+                    <button onclick="javascript: changeDepot()" type="button" class="btn btn-secondary">Change Takeoff Point</button>
+
+                  </div> 
+
+
+                  <div class="form-group">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                      <h4 class="h4">Generate Flight Plan</h4>
+                      <div class="btn-toolbar mb-2 mb-md-0">
+                      </div>
+                    </div>
+      
+                    <div class="input-group">
+                      <select class="custom-select" id="algorithm" name="algorithm">
+                        <option selected>Choose the Algorithm...</option>
+                        <option value="1">MILP</option>
+                        <option value="2">Tabu Search</option>
+                        <option value="3">Hybrid Genetic Algorithm</option>
+                        <option value="4">All</option>
+      
+                      </select>
+                      <div class="input-group-append">
+                        <button onclick="javascript: generateFlightPlan('false')" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
+                      </div>
+                    </div>
+      
+                    <div class='bd-example' id='result'>
+                    </div>
+
+                  </div> 
+
+
+                </div>  
+              </div>
+
+
+              <br>
+
+            </div>
+              
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">                
+                <div class='row'>
+                  <div class='col-md-6'>
+
+                    <div class="form-group">
+
+                      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Locations</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                        </div>
+                      </div>
+                      <!--The div element for the map -->
+                      <div id="map_manual"></div>
+
+
+
+                    </div>
+
+
+                    <div class="form-group">
+                         
+                      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h4 class="h4">Generate Flight Plan</h4>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                        </div>
+                      </div>
+        
+                      <div class="input-group">
+                        <select class="custom-select" id="algorithmManual" name="algorithmManual">
+                          <option selected>Choose the Algorithm...</option>
+                          <option value="1">MILP</option>
+                          <option value="2">Tabu Search</option>
+                          <option value="3">Hybrid Genetic Algorithm</option>
+                          <option value="4">All</option>
+        
+                        </select>
+                        <div class="input-group-append">
+                          <button onclick="javascript: generateFlightPlan('true')" class="btn btn-outline-secondary" type="button">Generate Flight Plan</button>
+                        </div>
+                      </div>
+        
+                      <div class='bd-example' id='resultManual'>
+                      </div>
+
+
+
+                    </div>
+
+
+
+                 
+
+                  
+                  </div>
+                  <div class='col-md-6'>
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+
+                      <div class="col-md-8">
+                        <h1 class="h2">Sites List</h1>
+                      </div>
+                      <div class="col-md-4">
+                        <button onclick="javascript: addPoint()" type="button" class="btn btn-secondary btn-lg">New Point</button>
+                      </div>
+
+                      <div class="btn-toolbar mb-2 mb-md-0">
+                      </div>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-striped table-sm">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Location</th>
+                            <th>Added to the Flight Plan?</th>
+                            <th>Sensor Type</th>
+                            <th>Active?</th>
+
+                            <th>Options</th>
+          
+                          </tr>
+                        </thead>
+                        <tbody id="sensorsListManual">
+                        
+                        </tbody>
+                      </table>
+
+
+                    </div>
+
+                    <div style="display:none" id="sensorNew">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                          <h1 class="h2">New Sensor</h1>
+                          <div class="btn-toolbar mb-2 mb-md-0">
+                          </div>
+                        </div>
+
+
+                        <div class="form-group">
+                          <select class="custom-select" id="sensorType" name="sensorType">
+                            <option selected>Choose the type of sensor...</option>
+          
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <div id="currentDepotManual">Nothing yet...</div>
+                          <input type="text" value="" id="logDepotManual">
+                          <input type="text" value="" id="latDepotManual">
+
+                          <button onclick="javascript: sendNewPoint()" type="button" class="btn btn-secondary">Add Point</button>
+                        </div>
+
+
+
+                    </div>
+
+
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                      <h1 class="h2">Sensors Group List</h1>
+                      <div class="btn-toolbar mb-2 mb-md-0">
+                      </div>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-striped table-sm">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Sensor Type</th>
+                            <th>Amount</th>
+                            <th>Add to Flight Plan?</th>
+                            <th>Options</th>
+          
+                          </tr>
+                        </thead>
+                        <tbody id="groupList">
+                        
+                        </tbody>
+                      </table>
+                    </div>
+
+
+
+                </div>
+  
+
+            </div>
+            
+          </div>
+
+        
+
+        </main>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha384-vk5WoKIaW/vJyUAd9n/wmopsmNhiy+L2Z+SBxGYnUkunIxVxAv/UtMOhba/xskxh" crossorigin="anonymous"></script>    <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="assets/js/vendor/popper.min.js"></script>
+    <script src="dist/js/bootstrap.min.js"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script>
+      feather.replace()
+    </script>
+
+          <!--Load the API from the specified URL
+          * The async attribute allows the browser to render the page while the API loads
+          * The key parameter will contain your own API key (which is not needed for this tutorial)
+          * The callback parameter executes the initMap() function
+          -->
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5nULZbkU5ERaNiY90RBgkHLLabiI-nCY&callback=initMap">
+    </script>
+
+
+    <script> 
+
+      function add_sensors_plan(id){
+        $.ajax({
+          url : 'http://127.0.0.1:5000/add_sensors_plan?id='+id,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {
+            loadSensorsManual()
+            loadSitesManual()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }  
+
+
+      function remove_sensors_plan(id){
+        $.ajax({
+          url : 'http://127.0.0.1:5000/remove_sensors_plan?id='+id,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {
+            loadSensorsManual()
+            loadSitesManual()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }  
+
+
+    function loadSensorsManual(){
+
+      $.ajax({
+          url : 'http://127.0.0.1:5000/get_sensors_manual',
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            
+            var $body = $('#groupList')
+            $body.html('')
+            $.each(data, function(i, item) {
+                var j = JSON.parse(item)
+
+                var $tr = $('<tr>').append(
+                      $('<td>').text(j.id),
+                      $('<td>').text(j.nome),
+                      $('<td>').text(j.quantidade),
+                      $('<td>').text(j.solicitado),
+                      $('<td>').html(' <a href="javascript:add_sensors_plan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
+                        + ' <a href="javascript:remove_sensors_plan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
+
+                  ); 
+
+                $body.append($tr)
+
+              });
+          },
+          error : function(request,error){
+            alert("Request: "+JSON.stringify(request));
+          }
+        });
+
+    }
+    
+    function loadSitesManual(){
+
+        $.ajax({
+            url : 'http://127.0.0.1:5000/get_sites_manual',
+            type : 'GET',
+            dataType:'json',
+            success : function(data) {              
+              
+              var $body = $('#sensorsListManual')
+
+              $body.html('')
+
+              $.each(data, function(i, item) {
+                var j = JSON.parse(item)
+                var buttons =  ""
+                var service = "change_active"
+                
+                if(j.active == false){
+                  buttons = ' <a href="javascript:change('+j.id+', '+'1'+')"  > <span > <i title="Turn on"  class="fa fa-toggle-off" aria-hidden="true"></i>'
+                }else{
+                  buttons = ' <a href="javascript:change('+j.id+', '+'1'+')"  > <span > <i title="Turn off" class="fa fa-toggle-on" aria-hidden="true"></i>'
+                }
+
+                if(j.routed == false){
+                  buttons += ' <a href="javascript:change('+j.id+', 2)"  > <span > <i title="Add to Plan" class="fas fa-plus-circle"></i> </span> </a>'
+                }else{
+                  buttons += ' <a href="javascript:change('+j.id+', 2)"  > <span > <i title="Remove from Plan" class="fas fa-minus-circle" aria-hidden="true"></i>'
+                }
+
+                var $tr = $('<tr>').append(
+                      $('<td>').text(j.id),
+                      $('<td>').text(j.posicao),
+                      $('<td>').text(j.routed),
+                      $('<td>').text(j.sensorType),
+                      $('<td>').text(j.active),
+                      $('<td>').html(buttons)
+
+                ); 
+
+                $body.append($tr)
+
+              });
+            },
+            error : function(request,error){
+              alert("Request: "+JSON.stringify(request));
+            }
+          });
+
+
+        }
+
+    function change(id, service){
+
+      if (service == "1"){
+        var serv = "change_active"
+      }else{
+        var serv = "change_site_plan"
+      }
+
+      $.ajax({
+        url : 'http://127.0.0.1:5000/'+serv+'?id='+id,
+        type : 'GET',
+        dataType:'json',
+        success : function(data) {              
+          loadSitesManual()
+        },
+        error : function(request,error){
+          alert("Request: "+JSON.stringify(request));
+        }
+      });
+    }
+
+    function loadTypes(){
+
+
+        $.ajax({
+            url : 'http://127.0.0.1:5000/get_types',
+            type : 'GET',
+            dataType:'json',
+            success : function(data) {              
+              
+              var $select = $('#sensorType')
+                $.each(data, function(i, item) {
+                  var j = JSON.parse(item)
+                  var $option =  $('<option>').html("<option value='"+j.id+"' selected>"+j.type+"</option>")
+
+                          
+                  $select.append($option)
+
+                });
+            },
+            error : function(request,error){
+              alert("Request: "+JSON.stringify(request));
+            }
+          });
+
+
+      }
+
+      function sendNewPoint(){
+
+        var latitude = $('#latDepotManual').val()
+        var longitude = $('#logDepotManual').val()
+        var sensorType = $('#sensorType').val()
+
+        $.ajax({
+            url : 'http://127.0.0.1:5000/add_sensor?latitude='+ latitude + '&longitude='+  longitude+'&sensorType='+sensorType,
+            type : 'GET',
+            dataType:'json',
+            success : function(data) {          
+              loadSitesManual()
+              loadSensorsManual()
+
+              $("#sensorNew").css('display', 'none');
+              $('#latDepotManual').val('')
+              $('#logDepotManual').val('')
+              $('#sensorType').val('')
+
+            },
+            error : function(request,error){
+              alert("Request: "+JSON.stringify(request));
+            }
+          });
+
+
+      }
+
+    function addPoint(){
+
+      $("#sensorNew").css('display', 'block');
+
+      var mapOptions;
+
+      mapOptions = {
+          zoom: 22,
+          mapTypeId: 'satellite',
+          center: {lat: 41.287083, lng: -8.639556}
+      }
+
+
+      map_manual = new google.maps.Map(document.getElementById("map_manual"), mapOptions);
+
+      var zero = new google.maps.Marker({
+          position: new google.maps.LatLng(41.287083, -8.639556),
+          draggable: true,
+          label: ' 0',
+          map: map_manual
+
+      });
+
+      google.maps.event.addListener(zero, 'dragend', function (evt) {
+          document.getElementById('currentDepotManual').innerHTML = '<p>Marker dropped: Current Lat: '
+          + evt.latLng.lat().toFixed(6) + ' Current Lng: ' + evt.latLng.lng().toFixed(6) + '</p>';
+          $('#latDepotManual').val(evt.latLng.lat().toFixed(6));
+          $('#logDepotManual').val(evt.latLng.lng().toFixed(6));
+      });
+
+      google.maps.event.addListener(zero, 'dragstart', function (evt) {
+          document.getElementById('currentDepotManual').innerHTML = '<p>Currently dragging marker...</p>';
+      });
+
+
+
+      }
+
+
+      function newPoints(){
+
+        $.ajax({
+          url : 'http://127.0.0.1:5000/newPoints',
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            location.reload()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }
+
+      function changeDepot(){
+
+        var latitude = $('#latDepot').val()
+        var longitude = $('#logDepot').val()
+
+        $.ajax({
+          url : 'http://127.0.0.1:5000/set_depot?latitude='+ latitude + '&longitude='+  longitude ,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            location.reload()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }
+
+      function generateFlightPlan(manual){
+
+        if(manual == 'true'){
+          var algorithm = $('select[name=algorithmManual]').val()
+        }else{
+          var algorithm = $('select[name=algorithm]').val()
+        }
+
+        $('#result').html('<div class="spinner-border"> </div>') 
+
+        $.ajax({
+          url : 'http://127.0.0.1:5000/generateFlightPlan?algorithm='+ algorithm+'&manual='+manual,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {
+            if(manual == "true"){
+              $('#resultManual').html(data)
+            }else{
+              $('#result').html(data)
+            }
+            
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }
+
+      function addSensorsToPlan(sensorType){
+        $.ajax({
+          url : 'http://127.0.0.1:5000/addSensors?tipoSensor='+sensorType,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {
+            console.log(data)
+            location.reload()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+
+      }
+        
+      function removeSensorsFromPlan(sensorType){
+        $.ajax({
+          url : 'http://127.0.0.1:5000/removeSensors?tipoSensor='+sensorType,
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            console.log(data)
+            location.reload()
+          },
+          error : function(request,error){
+            console.log(JSON.stringify(request))
+            console.log(JSON.stringify(error))
+          }
+        });
+      }
+
+      $( document ).ready(function() {
+
+        var map_simulation;
+        var map_manual;
+
+        $.ajax({
+          url : 'http://127.0.0.1:5000/get_sites',
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+
+            console.log(data)
+            var myLatlng;
+            var mapOptions;
+            var map;
+            var marker;
+            var lat =  [];
+            var logt =  [];
+            var alt =  [];
+            var sensorType =  [];
+            var id =  [];
+
+            $.each(data, function(i, item) {
+              var j = JSON.parse(item)
+              lat [i] = j.posicao[0]
+              logt [i] = j.posicao[1]
+              alt [i] = j.posicao[2]
+
+              sensorType [i] = j.sensorType
+              id [i] = j.id
+
+            });
+            
+            console.log(lat)
+            console.log(logt)
+            
+            mapOptions = {
+                zoom: 22,
+                mapTypeId: 'satellite',
+                center: {lat: lat[0], lng: logt[0]}
+            }
+
+            map_simulation = new google.maps.Map(document.getElementById("map_simulation"), mapOptions);
+            map_manual = new google.maps.Map(document.getElementById("map_manual"), mapOptions);
+
+
+            var zero = new google.maps.Marker({
+                position: new google.maps.LatLng(lat[0], logt[0]),
+                draggable: true,
+                label: ' 0',
+                map: map_simulation
+
+            });
+
+            google.maps.event.addListener(zero, 'dragend', function (evt) {
+                document.getElementById('currentDepotSimulation').innerHTML = '<p>Marker dropped: Current Lat: '
+                 + evt.latLng.lat().toFixed(6) + ' Current Lng: ' + evt.latLng.lng().toFixed(6) + '</p>';
+                 $('#latDepot').val(evt.latLng.lat().toFixed(6));
+                 $('#logDepot').val(evt.latLng.lng().toFixed(6));
+            });
+
+            google.maps.event.addListener(zero, 'dragstart', function (evt) {
+                document.getElementById('currentDepotSimulation').innerHTML = '<p>Currently dragging marker...</p>';
+            });
+
+
+            for (i = 1; i < lat.length; i++) { 
+
+              marker = new google.maps.Marker({
+                position: new google.maps.LatLng(lat[i], logt[i]),
+                label: ''+ id [i],
+                map: map_simulation
+              });
+
+              addInfoWindow(marker, 'Altitude:'+alt[i]+' <br>'+'Tipo do sensor:'+sensorType[i])
+
+            }
+
+
+          },
+          error : function(request,error){
+            alert("Request: "+JSON.stringify(request));
+            alert("Request: "+JSON.stringify(error));
+
+          }
+        });
+
+
+        $.ajax({
+          url : 'http://127.0.0.1:5000/get_sensors',
+          type : 'GET',
+          dataType:'json',
+          success : function(data) {              
+            
+            var $body = $('#sensorsList')
+              $.each(data, function(i, item) {
+                var j = JSON.parse(item)
+
+                var $tr = $('<tr>').append(
+                      $('<td>').text(j.id),
+                      $('<td>').text(j.nome.type),
+                      $('<td>').text(j.quantidade),
+                      $('<td>').text(j.solicitado),
+                      $('<td>').html(' <a href="javascript:addSensorsToPlan('+j.id +') " > <span > <i class="fas fa-plus-circle"></i> </span> </a>'
+                        + ' <a href="javascript:removeSensorsFromPlan('+j.id +') " > <span > <i class="fas fa-minus-circle"></i> </span> </a>')
+
+                  ); 
+
+                $body.append($tr)
+
+              });
+          },
+          error : function(request,error){
+            alert("Request: "+JSON.stringify(request));
+          }
+        });
+
+
+        loadTypes()
+        loadSitesManual()
+        loadSensorsManual()
+
+      });
+
+      function addInfoWindow(marker, message) {
+
+        var infoWindow = new google.maps.InfoWindow({
+            content: message
+        });
+
+        google.maps.event.addListener(marker, 'click', function () {
+            infoWindow.open(map_simulation, marker);
+        });
+      }
+
+
+    </script>
+
+
+
+  </body>
+</html>

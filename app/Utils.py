@@ -4,6 +4,7 @@ import math
 import os
 import numpy as np
 import Site as Site
+rnd = np.random
 
 
 def get_line_flight_plan(sites, id):
@@ -79,9 +80,18 @@ def generate_file_flight_plan(tours, listaSites, file_name):
 def generate_random_data(lat, lon, num_rows,idSite, idSensor):
     sitesTemp = []
     for _ in range(num_rows):
-        dec_lat = random.random()/10000
-        dec_lon = random.random()/10000
-        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,2)) , False, idSensor, False)
+        dec_lat = random.random()/100
+        dec_lon = random.random()/100
+        site = Site.Site(str(idSite), (lat+dec_lat, lon+dec_lon, np.random.randint(1,2)) , False, idSensor, False, rnd.randint(512, 1024))
+        idSite += 1
+        sitesTemp.append(site)
+    return sitesTemp
+
+
+def generate_random_data_cartesian(num_rows,idSite, idSensor):
+    sitesTemp = []
+    for _ in range(num_rows):
+        site = Site.Site(str(idSite), (rnd.randint(0, 2000), rnd.randint(0, 2000), rnd.randint(30, 50)) , False, idSensor, False, rnd.randint(512, 1024))
         idSite += 1
         sitesTemp.append(site)
     return sitesTemp

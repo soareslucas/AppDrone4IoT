@@ -22,7 +22,7 @@ ax = Axes3D(fig)
 
 from sklearn.cluster import KMeans
 
-n_clusters == 10
+n_clusters = 10
 Kmean = KMeans(n_clusters)
 Kmean.fit(Xyz)
 centroids = Kmean.cluster_centers_
