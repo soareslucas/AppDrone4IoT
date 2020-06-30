@@ -612,14 +612,14 @@
       mapOptions = {
           zoom: 22,
           mapTypeId: 'satellite',
-          center: {lat: 41.287083, lng: -8.639556}
+          center: {lat: -16.683378, lng: -49.280236}
       }
 
 
       map_manual = new google.maps.Map(document.getElementById("map_manual"), mapOptions);
 
       var zero = new google.maps.Marker({
-          position: new google.maps.LatLng(41.287083, -8.639556),
+          position: new google.maps.LatLng(-16.683378, -49.280236),
           draggable: true,
           label: ' 0',
           map: map_manual
@@ -789,7 +789,7 @@
 
 
             var zero = new google.maps.Marker({
-                position: new google.maps.LatLng(lat[0], logt[0]),
+                position: new google.maps.LatLng("-49.174805", "-16.651981"),
                 draggable: true,
                 label: ' 0',
                 map: map_simulation
