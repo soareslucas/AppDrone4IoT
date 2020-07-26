@@ -604,15 +604,20 @@ def generateConfidentInterval():
     plt.hist(meanArray)
     plt.show()
 
+    plt.plot(lower,[0, 3.2], 'k-', lw=2, color='navy')
+    plt.plot(upper,[0, 3.2], 'k-', lw=2, color='navy')
+
+    plt.hist(meanArray, 200, density=True, color='lightblue')
 
 
+    plt.show()
 
     #results = resultMultiVeiculos + resultSingleVeiculos
     #results = resultSingleVeiculos
 
     
 
-    return Response(json.dumps(results),  mimetype='application/json')
+    return Response(json.dumps("ok"),  mimetype='application/json')
 
 @app.route("/generateFlightPlan", methods=['GET'])
 def plan_flight():
