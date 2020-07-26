@@ -556,23 +556,29 @@ def generateConfidentInterval():
     listaSitesPlan = [ depot]
 
     arr = []
+    meanArray = []
+    for i in range(20):
+        print('Média número'+str(i+1))
 
-    for i in range(10):
-        listaSitesPlan = [ depot]
-        print('Replicação número'+str(i+1))
-        new_points()
-        for x in listaSensores:
-            sites = x.getSites()
-            for y in sites:
-                listaSitesPlan.append(y)
+        for j in range(20):
+            listaSitesPlan = [ depot]
+            print('Média número'+str(i+1))
+            print('Replicação número'+str(j+1))
+            new_points()
+            for x in listaSensores:
+                sites = x.getSites()
+                for y in sites:
+                    listaSitesPlan.append(y)
 
-        print("Número de sensores: "+ str(len(listaSitesPlan) - 1))
+            print("Número de sensores: "+ str(len(listaSitesPlan) - 1))
 
-        start_time = time.time()
-        resultMultiVeiculos = otim.getMax(listaSitesPlan, vehicles)
-        print("--- %s seconds ---" % (time.time() - start_time))
-        arr.append((time.time() - start_time))
-        print("Multi vehicle: " + str(resultMultiVeiculos))
+            start_time = time.time()
+            resultMultiVeiculos = otim.getMax(listaSitesPlan, vehicles)
+            print("--- %s seconds ---" % (time.time() - start_time))
+            arr.append((time.time() - start_time))
+            print("Multi vehicle: " + str(resultMultiVeiculos))
+
+        meanArray.append(np.mean(arr))
 
     #start_time = time.time()
     #resultSingleVeiculos = otimOld.getMaximoDeSensores(listaSitesPlan, 90000)
@@ -581,22 +587,27 @@ def generateConfidentInterval():
 
 
     alpha = 0.05                       # significance level = 5%
-    df = len(arr) - 1                  # degress of freedom = 20
+    df = len(meanArray) - 1                  # degress of freedom = 20
     t = stats.t.ppf(1 - alpha/2, df)   # t-critical value for 95% CI = 2.093
-    s = np.std(arr, ddof=1)            # sample standard deviation = 2.502
-    n = len(arr)
+    s = np.std(meanArray, ddof=1)            # sample standard deviation = 2.502
+    n = len(meanArray)
 
-    lower = np.mean(arr) - (t * s / np.sqrt(n))
-    upper = np.mean(arr) + (t * s / np.sqrt(n))
+    lower = np.mean(meanArray) - (t * s / np.sqrt(n))
+    upper = np.mean(meanArray) + (t * s / np.sqrt(n))
     
-    print(arr)
+    print(meanArray)
     print('intervalo de confiança para nível 95%')
     print(lower, upper)
 
 
+    plt.figure(figsize=(20,10))
+    plt.hist(meanArray)
+    plt.show()
 
 
-    results = resultMultiVeiculos + resultSingleVeiculos
+
+
+    #results = resultMultiVeiculos + resultSingleVeiculos
     #results = resultSingleVeiculos
 
     
@@ -791,35 +802,35 @@ def new_points():
     idSite = lastSite.getId()
     listaSensores = [sensor]
 
-    idSite = int(idSite) + 1
+    """     idSite = int(idSite) + 1
 
-    #sitesList = util.generate_random_data(latitude, longitude, 2, int(idSite), 2)
-    sitesList = util.generate_random_data_cartesian( 2, idSite, 2)
+        #sitesList = util.generate_random_data(latitude, longitude, 2, int(idSite), 2)
+        sitesList = util.generate_random_data_cartesian( 2, idSite, 2)
 
-    sensor = Sensor.Sensor( 2,listaTypes[1],2, sitesList)
-    lastSite = sitesList[len(sitesList) -1]
-    idSite = lastSite.getId()
-    listaSensores.append(sensor)
+        sensor = Sensor.Sensor( 2,listaTypes[1],2, sitesList)
+        lastSite = sitesList[len(sitesList) -1]
+        idSite = lastSite.getId()
+        listaSensores.append(sensor)
 
-    idSite = int(idSite) + 1
+        idSite = int(idSite) + 1
 
-    #sitesList = util.generate_random_data(latitude, longitude, 2, int(idSite), 3)
-    sitesList = util.generate_random_data_cartesian( 2, idSite, 3)
+        #sitesList = util.generate_random_data(latitude, longitude, 2, int(idSite), 3)
+        sitesList = util.generate_random_data_cartesian( 2, idSite, 3)
 
-    sensor = Sensor.Sensor( 3,listaTypes[2],2,sitesList)
-    lastSite = sitesList[len(sitesList) -1]
-    idSite = lastSite.getId()
-    listaSensores.append(sensor)
+        sensor = Sensor.Sensor( 3,listaTypes[2],2,sitesList)
+        lastSite = sitesList[len(sitesList) -1]
+        idSite = lastSite.getId()
+        listaSensores.append(sensor)
 
-    #idSite = int(idSite) + 1
+        idSite = int(idSite) + 1
 
-    #sitesList = util.generate_random_data(latitude, longitude, 2, int(idSite), 4)
-    #sitesList = util.generate_random_data_cartesian(1, idSite, 4)
+        #sitesList = util.generate_random_data(latitude, longitude, 2, int(idSite), 4)
+        sitesList = util.generate_random_data_cartesian(1, idSite, 4)
 
-    #sensor = Sensor.Sensor(4,listaTypes[3],1, sitesList)
-    #lastSite = sitesList[len(sitesList) -1]
-   # idSite = lastSite.getId()
-    #listaSensores.append(sensor)  
+        sensor = Sensor.Sensor(4,listaTypes[3],1, sitesList)
+        lastSite = sitesList[len(sitesList) -1]
+        idSite = lastSite.getId()
+        listaSensores.append(sensor)   """
 
 
 
