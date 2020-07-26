@@ -13,6 +13,9 @@ import Otimizacao as otim
 import Otimizacao_old as otimOld
 import time
 
+from scipy import stats
+
+
 import Sensor as Sensor
 import Site as Site
 import SensorType as SensorType
@@ -529,6 +532,77 @@ def generateResultsCompared():
     return Response(json.dumps(results),  mimetype='application/json')
 
 
+
+@app.route("/geraConfianca", methods=['GET'])
+def generateConfidentInterval():
+
+    algorithm = request.args.get('algorithm')
+
+    manual = request.args.get('manual')
+    
+    listaSitesPlan = []
+
+    results = ''
+    vehicles = []
+    vehicle = Vehicle.Vehicle( 200000 )
+    vehicle.setId("1")
+    vehicles.append(vehicle)
+    vehicle = Vehicle.Vehicle( 200000 )
+    vehicle.setId("2")
+    vehicles.append(vehicle)
+
+
+    depot = Site.Site(str(0), (0, 0, 0) , False, 0, False, 0)
+    listaSitesPlan = [ depot]
+
+    arr = []
+
+    for i in range(10):
+        listaSitesPlan = [ depot]
+        print('Replicação número'+str(i+1))
+        new_points()
+        for x in listaSensores:
+            sites = x.getSites()
+            for y in sites:
+                listaSitesPlan.append(y)
+
+        print("Número de sensores: "+ str(len(listaSitesPlan) - 1))
+
+        start_time = time.time()
+        resultMultiVeiculos = otim.getMax(listaSitesPlan, vehicles)
+        print("--- %s seconds ---" % (time.time() - start_time))
+        arr.append((time.time() - start_time))
+        print("Multi vehicle: " + str(resultMultiVeiculos))
+
+    #start_time = time.time()
+    #resultSingleVeiculos = otimOld.getMaximoDeSensores(listaSitesPlan, 90000)
+    #print("--- %s seconds ---" % (time.time() - start_time))
+    #print("Single vehicle: " + str(resultSingleVeiculos))
+
+
+    alpha = 0.05                       # significance level = 5%
+    df = len(arr) - 1                  # degress of freedom = 20
+    t = stats.t.ppf(1 - alpha/2, df)   # t-critical value for 95% CI = 2.093
+    s = np.std(arr, ddof=1)            # sample standard deviation = 2.502
+    n = len(arr)
+
+    lower = np.mean(arr) - (t * s / np.sqrt(n))
+    upper = np.mean(arr) + (t * s / np.sqrt(n))
+    
+    print(arr)
+    print('intervalo de confiança para nível 95%')
+    print(lower, upper)
+
+
+
+
+    results = resultMultiVeiculos + resultSingleVeiculos
+    #results = resultSingleVeiculos
+
+    
+
+    return Response(json.dumps(results),  mimetype='application/json')
+
 @app.route("/generateFlightPlan", methods=['GET'])
 def plan_flight():
 
@@ -737,15 +811,15 @@ def new_points():
     idSite = lastSite.getId()
     listaSensores.append(sensor)
 
-    idSite = int(idSite) + 1
+    #idSite = int(idSite) + 1
 
     #sitesList = util.generate_random_data(latitude, longitude, 2, int(idSite), 4)
-    sitesList = util.generate_random_data_cartesian( 2, idSite, 4)
+    #sitesList = util.generate_random_data_cartesian(1, idSite, 4)
 
-    sensor = Sensor.Sensor(4,listaTypes[3],2, sitesList)
-    lastSite = sitesList[len(sitesList) -1]
-    idSite = lastSite.getId()
-    listaSensores.append(sensor)  
+    #sensor = Sensor.Sensor(4,listaTypes[3],1, sitesList)
+    #lastSite = sitesList[len(sitesList) -1]
+   # idSite = lastSite.getId()
+    #listaSensores.append(sensor)  
 
 
 
