@@ -11,6 +11,7 @@ from flask_cors import CORS, cross_origin
 import numpy as np
 import Otimizacao as otim
 import Otimizacao_old as otimOld
+import time
 
 import Sensor as Sensor
 import Site as Site
@@ -505,11 +506,14 @@ def generateResultsCompared():
 
         print("Número de sensores: "+ str(len(listaSitesPlan) - 1))
 
+        start_time = time.time()
         resultMultiVeiculos = otim.getMax(listaSitesPlan, vehicles)
+        print("--- %s seconds ---" % (time.time() - start_time))
         print("Multi vehicle: " + str(resultMultiVeiculos))
 
+        start_time = time.time()
         resultSingleVeiculos = otimOld.getMaximoDeSensores(listaSitesPlan, 90000)
-
+        print("--- %s seconds ---" % (time.time() - start_time))
         print("Single vehicle: " + str(resultSingleVeiculos))
 
 
