@@ -10,6 +10,8 @@ from flask import request
 from flask_cors import CORS, cross_origin
 import numpy as np
 import Otimizacao as otim
+import Otimizacao_old as otimOld
+
 import Sensor as Sensor
 import Site as Site
 import SensorType as SensorType
@@ -472,17 +474,65 @@ def generateResults():
 
 
 
+@app.route("/geraResultadosComparados", methods=['GET'])
+def generateResultsCompared():
 
+    global listaSites
+    algorithm = request.args.get('algorithm')
+
+    manual = request.args.get('manual')
+    
+    listaSitesPlan = []
+
+    results = ''
+    vehicles = []
+    vehicle = Vehicle.Vehicle( 200000 )
+    vehicle.setId("1")
+    vehicles.append(vehicle)
+    vehicle = Vehicle.Vehicle( 200000 )
+    vehicle.setId("2")
+    vehicles.append(vehicle)
+
+
+    depot = Site.Site(str(0), (0, 0, 0) , False, 0, False, 0)
+    listaSitesPlan = [ depot]
+
+    for x in listaSensores:
+
+        sites = x.getSites()
+        for y in sites:
+            listaSitesPlan.append(y)
+
+        print("Número de sensores: "+ str(len(listaSitesPlan) - 1))
+
+        resultMultiVeiculos = otim.getMax(listaSitesPlan, vehicles)
+        print("Multi vehicle: " + str(resultMultiVeiculos))
+
+        resultSingleVeiculos = otimOld.getMaximoDeSensores(listaSitesPlan, 90000)
+
+        print("Single vehicle: " + str(resultSingleVeiculos))
+
+
+
+
+
+
+    results = resultMultiVeiculos + resultSingleVeiculos
+    #results = resultSingleVeiculos
+
+    
+
+    return Response(json.dumps(results),  mimetype='application/json')
 
 
 @app.route("/generateFlightPlan", methods=['GET'])
 def plan_flight():
 
     vehicles = []
-    vehicle = Vehicle.Vehicle( 2000 )
+    vehicle = Vehicle.Vehicle( 10000 )
     vehicle.setId("1")
     vehicles.append(vehicle)
-    vehicle = Vehicle.Vehicle( 2000 )
+    vehicle = Vehicle.Vehicle( 10000 )
     vehicle.setId("2")
     vehicles.append(vehicle)
 
